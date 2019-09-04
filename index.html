@@ -1,0 +1,959 @@
+<!DOCTYPE html>
+<html>
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="utf-8">
+  
+
+  
+  <title>博客</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta property="og:type" content="website">
+<meta property="og:title" content="博客">
+<meta property="og:url" content="http://xuefenghuang.github.io/index.html">
+<meta property="og:site_name" content="博客">
+<meta property="og:locale" content="en">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="博客">
+  
+    <link rel="alternate" href="/atom.xml" title="博客" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  
+    <link href="//fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
+  
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+</html>
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">博客</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="Search"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://xuefenghuang.github.io"></form>
+      </div>
+    </div>
+  </div>
+</header>
+      <div class="outer">
+        <section id="main">
+  
+    <article id="post-2019-07-14-redis-study-record" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2019/09/04/2019-07-14-redis-study-record/" class="article-date">
+  <time datetime="2019-09-04T06:03:48.076Z" itemprop="datePublished">2019-09-04</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2019/09/04/2019-07-14-redis-study-record/">redis学习笔记</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h3 id="数据类型："><a href="#数据类型：" class="headerlink" title="数据类型："></a>数据类型：</h3><p>(1) 字符串（支持整型、浮点数等）</p>
+<p>(2) 列表</p>
+<p>(3) 集合</p>
+<p>(4) 散列</p>
+<p>(5) 有序集合</p>
+<h3 id="快照（一个时间的副本）、AOF（记录命令）"><a href="#快照（一个时间的副本）、AOF（记录命令）" class="headerlink" title="快照（一个时间的副本）、AOF（记录命令）"></a>快照（一个时间的副本）、AOF（记录命令）</h3><h3 id="应用："><a href="#应用：" class="headerlink" title="应用："></a>应用：</h3><p>（1）最新日志 lpush 列表</p>
+<p>（2）常见日志 有序集合</p>
+<p>（3）计数器 有序集合</p>
+<p>（4）IP zrevrangebyscore ip_to_score算法</p>
+<p>（5）自动补全 list</p>
+<p>（6）通讯录自动补全 有序集合，score=0, member根据a-z排序</p>
+<p>（7）分布式锁 setnx</p>
+<p>（8）计数信号量 有序集合</p>
+<p>（9）消息拉取 群组、用户、zset</p>
+<h3 id="redis一致性问题"><a href="#redis一致性问题" class="headerlink" title="redis一致性问题"></a>redis一致性问题</h3><p>Redis 并不能保证数据的强一致性. 这意味这在实际中集群在特定的条件下可能会丢失写操作：第一个原因是因为集群是用了异步复制. 写操作过程:</p>
+<p>（1）客户端向主节点B写入一条命令.</p>
+<p>（2）主节点B向客户端回复命令状态.</p>
+<p>（3）主节点将写操作复制给他得从节点 B1, B2 和 B3</p>
+<h3 id="数据分片"><a href="#数据分片" class="headerlink" title="数据分片"></a>数据分片</h3><p>Redis 集群使用数据分片（sharding）而非一致性哈希（consistency hashing）来实现： 一个 Redis 集群包含 16384 个哈希槽（hash slot）， 数据库中的每个键都属于这 16384 个哈希槽的其中一个， 集群使用公式 CRC16(key) % 16384 来计算键 key 属于哪个槽， 其中 CRC16(key) 语句用于计算键 key 的 CRC16 校验和 。</p>
+<p>如果用户将新节点 D 添加到集群中， 那么集群只需要将节点 A 、B 、 C 中的某些槽移动到节点 D 就可以了。<br>如果用户要从集群中移除节点 A ， 那么集群只需要将节点 A 中的所有哈希槽移动到节点 B 和节点 C ， 然后再移除空白（不包含任何哈希槽）的节点 A 就可以了。</p>
+<h3 id="主从复制"><a href="#主从复制" class="headerlink" title="主从复制"></a>主从复制</h3><p>为了使得集群在一部分节点下线或者无法与集群的大多数（majority）节点进行通讯的情况下， 仍然可以正常运作， Redis 集群对节点使用了主从复制功能： 集群中的每个节点都有 1 个至 N 个复制品（replica）， 其中一个复制品为主节点（master）， 而其余的 N-1 个复制品为从节点（slave）</p>
+<h3 id="选主"><a href="#选主" class="headerlink" title="选主"></a>选主</h3><p>当有n个节点标记master为主观下线时，master被标记为客观下线，这个时候sentinel集群会发起一次领头选举，raft协议，由选出的领头进行故障转移，把一个复制偏移量最大的从节点提升为master，然后通过发布订阅的形式通知客户端切换ip。</p>
+<h3 id="缓存穿透"><a href="#缓存穿透" class="headerlink" title="缓存穿透"></a>缓存穿透</h3><p>是指查询一个一定不存在的数据，由于缓存是不命中时需要从数据库查询，查不到数据则不写入缓存，这将导致这个不存在的数据每次请求都要到数据库去查询，造成缓存穿透。<br>解决办法是缓存空对象. 将 null 变成一个值.</p>
+<p>如果缓存集中在一段时间内失效，发生大量的缓存穿透，所有的查询都落在数据库上，造成了缓存雪崩。解决办法是加锁排队。</p>
+<h3 id="redis主从同步"><a href="#redis主从同步" class="headerlink" title="redis主从同步"></a>redis主从同步</h3><p>分为sync, psync(部分重同步)。根据复制offset和复制积压缓冲区、服务器运行ID判断是部分复制还是完整复制。优点是提高复制效率，不用每次都全部复制。以前的不能高效地处理断线后重复制的情况。</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://xuefenghuang.github.io/2019/09/04/2019-07-14-redis-study-record/" data-id="ck04v12z400073sybclmk15gw" class="article-share-link">Share</a>
+      
+      
+    </footer>
+  </div>
+  
+</article>
+
+
+  
+    <article id="post-2019-09-04-design-patterns-study" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2019/09/04/2019-09-04-design-patterns-study/" class="article-date">
+  <time datetime="2019-09-04T06:03:48.076Z" itemprop="datePublished">2019-09-04</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2019/09/04/2019-09-04-design-patterns-study/">go语言设计模式学习笔记</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h1 id="目录"><a href="#目录" class="headerlink" title="目录"></a>目录</h1><ol>
+<li><a href="#单例模式">单例模式</a></li>
+<li><a href="#简单工厂模式">简单工厂模式</a></li>
+<li><a href="#工厂方法模式">工厂方法模式</a></li>
+<li><a href="#抽象工厂模式">抽象工厂模式</a></li>
+<li><a href="#策略模式">策略模式</a></li>
+<li><a href="#观察者模式">观察者模式</a></li>
+<li><a href="#装饰者模式">装饰者模式</a></li>
+</ol>
+<h3 id="单例模式"><a href="#单例模式" class="headerlink" title="单例模式 "></a>单例模式 <a name="单例模式"></a></h3><ul>
+<li>单例模式确保程序中一个类最多只有一个实例</li>
+<li>单例模式也提供访问这个实例的全局点</li>
+<li>有一些对象其实我们只需要一个，比方说：线程池，缓存，对话框，处理偏好设置和注册表对象，日志对象等。事实上，这类对象只能有一个实例，如果制造出多个实例，就会导致许多问题产生，例如：程序的行为异常、资源使用过量，或者是不一致的结果。</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">import &quot;sync&quot;</span><br><span class="line"></span><br><span class="line">//Singleton 是单例模式类</span><br><span class="line">type Singleton struct&#123;&#125;</span><br><span class="line"></span><br><span class="line">var singleton *Singleton</span><br><span class="line">var once sync.Once</span><br><span class="line"></span><br><span class="line">//GetInstance 用于获取单例模式对象</span><br><span class="line">func GetInstance() *Singleton &#123;</span><br><span class="line">	once.Do(func() &#123;</span><br><span class="line">		singleton = &amp;Singleton&#123;&#125;</span><br><span class="line">	&#125;)</span><br><span class="line"></span><br><span class="line">	return singleton</span><br></pre></td></tr></table></figure>
+
+<h3 id="简单工厂模式"><a href="#简单工厂模式" class="headerlink" title="简单工厂模式 "></a>简单工厂模式 <a name="简单工厂模式"></a></h3><ul>
+<li>go 语言没有构造函数一说，所以一般会定义NewXXX函数来初始化相关类。 NewXXX 函数返回接口时就是简单工厂模式，也就是说Golang的一般推荐做法就是简单工厂。</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line">import &quot;fmt&quot;</span><br><span class="line"></span><br><span class="line">//API is interface</span><br><span class="line">type API interface &#123;</span><br><span class="line">	Say(name string) string</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">//NewAPI return Api instance by type</span><br><span class="line">func NewAPI(t int) API &#123;</span><br><span class="line">	if t == 1 &#123;</span><br><span class="line">		return &amp;hiAPI&#123;&#125;</span><br><span class="line">	&#125; else if t == 2 &#123;</span><br><span class="line">		return &amp;helloAPI&#123;&#125;</span><br><span class="line">	&#125;</span><br><span class="line">	return nil</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">//hiAPI is one of API implement</span><br><span class="line">type hiAPI struct&#123;&#125;</span><br><span class="line"></span><br><span class="line">//Say hi to name</span><br><span class="line">func (*hiAPI) Say(name string) string &#123;</span><br><span class="line">	return fmt.Sprintf(&quot;Hi, %s&quot;, name)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">//HelloAPI is another API implement</span><br><span class="line">type helloAPI struct&#123;&#125;</span><br><span class="line"></span><br><span class="line">//Say hello to name</span><br><span class="line">func (*helloAPI) Say(name string) string &#123;</span><br><span class="line">	return fmt.Sprintf(&quot;Hello, %s&quot;, name)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="工厂方法模式"><a href="#工厂方法模式" class="headerlink" title="工厂方法模式 "></a>工厂方法模式 <a name="工厂方法模式"></a></h3><ul>
+<li>定义了一个创建对象的接口，但由子类决定要实例化的类是哪一个。工厂方法让类把实例化推迟到子类。</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br></pre></td><td class="code"><pre><span class="line">//Operator 是被封装的实际类接口</span><br><span class="line">type Operator interface &#123;</span><br><span class="line">	SetA(int)</span><br><span class="line">	SetB(int)</span><br><span class="line">	Result() int</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">//OperatorFactory 是工厂接口</span><br><span class="line">type OperatorFactory interface &#123;</span><br><span class="line">	Create() Operator</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">//OperatorBase 是Operator 接口实现的基类，封装公用方法</span><br><span class="line">type OperatorBase struct &#123;</span><br><span class="line">	a, b int</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">//SetA 设置 A</span><br><span class="line">func (o *OperatorBase) SetA(a int) &#123;</span><br><span class="line">	o.a = a</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">//SetB 设置 B</span><br><span class="line">func (o *OperatorBase) SetB(b int) &#123;</span><br><span class="line">	o.b = b</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">//PlusOperatorFactory 是 PlusOperator 的工厂类</span><br><span class="line">type PlusOperatorFactory struct&#123;&#125;</span><br><span class="line"></span><br><span class="line">func (PlusOperatorFactory) Create() Operator &#123;</span><br><span class="line">	return &amp;PlusOperator&#123;</span><br><span class="line">		OperatorBase: &amp;OperatorBase&#123;&#125;,</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">//PlusOperator Operator 的实际加法实现</span><br><span class="line">type PlusOperator struct &#123;</span><br><span class="line">	*OperatorBase</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">//Result 获取结果</span><br><span class="line">func (o PlusOperator) Result() int &#123;</span><br><span class="line">	return o.a + o.b</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">//MinusOperatorFactory 是 MinusOperator 的工厂类</span><br><span class="line">type MinusOperatorFactory struct&#123;&#125;</span><br><span class="line"></span><br><span class="line">func (MinusOperatorFactory) Create() Operator &#123;</span><br><span class="line">	return &amp;MinusOperator&#123;</span><br><span class="line">		OperatorBase: &amp;OperatorBase&#123;&#125;,</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">//MinusOperator Operator 的实际减法实现</span><br><span class="line">type MinusOperator struct &#123;</span><br><span class="line">	*OperatorBase</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">//Result 获取结果</span><br><span class="line">func (o MinusOperator) Result() int &#123;</span><br><span class="line">	return o.a - o.b</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="抽象工厂模式"><a href="#抽象工厂模式" class="headerlink" title="抽象工厂模式 "></a>抽象工厂模式 <a name="抽象工厂模式"></a></h3><ul>
+<li>提供一个接口，用于创建相关或依赖对象的家族，而不需要明确指定具体类</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br></pre></td><td class="code"><pre><span class="line">import &quot;fmt&quot;</span><br><span class="line"></span><br><span class="line">//OrderMainDAO 为订单主记录</span><br><span class="line">type OrderMainDAO interface &#123;</span><br><span class="line">	SaveOrderMain()</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">//OrderDetailDAO 为订单详情纪录</span><br><span class="line">type OrderDetailDAO interface &#123;</span><br><span class="line">	SaveOrderDetail()</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">//DAOFactory DAO 抽象模式工厂接口</span><br><span class="line">type DAOFactory interface &#123;</span><br><span class="line">	CreateOrderMainDAO() OrderMainDAO</span><br><span class="line">	CreateOrderDetailDAO() OrderDetailDAO</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">//RDBMainDAP 为关系型数据库的OrderMainDAO实现</span><br><span class="line">type RDBMainDAO struct&#123;&#125;</span><br><span class="line"></span><br><span class="line">//SaveOrderMain ...</span><br><span class="line">func (*RDBMainDAO) SaveOrderMain() &#123;</span><br><span class="line">	fmt.Print(&quot;rdb main save\n&quot;)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">//RDBDetailDAO 为关系型数据库的OrderDetailDAO实现</span><br><span class="line">type RDBDetailDAO struct&#123;&#125;</span><br><span class="line"></span><br><span class="line">// SaveOrderDetail ...</span><br><span class="line">func (*RDBDetailDAO) SaveOrderDetail() &#123;</span><br><span class="line">	fmt.Print(&quot;rdb detail save\n&quot;)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">//RDBDAOFactory 是RDB 抽象工厂实现</span><br><span class="line">type RDBDAOFactory struct&#123;&#125;</span><br><span class="line"></span><br><span class="line">func (*RDBDAOFactory) CreateOrderMainDAO() OrderMainDAO &#123;</span><br><span class="line">	return &amp;RDBMainDAO&#123;&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">func (*RDBDAOFactory) CreateOrderDetailDAO() OrderDetailDAO &#123;</span><br><span class="line">	return &amp;RDBDetailDAO&#123;&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">//XMLMainDAO XML存储</span><br><span class="line">type XMLMainDAO struct&#123;&#125;</span><br><span class="line"></span><br><span class="line">//SaveOrderMain ...</span><br><span class="line">func (*XMLMainDAO) SaveOrderMain() &#123;</span><br><span class="line">	fmt.Print(&quot;xml main save\n&quot;)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">//XMLDetailDAO XML存储</span><br><span class="line">type XMLDetailDAO struct&#123;&#125;</span><br><span class="line"></span><br><span class="line">// SaveOrderDetail ...</span><br><span class="line">func (*XMLDetailDAO) SaveOrderDetail() &#123;</span><br><span class="line">	fmt.Print(&quot;xml detail save&quot;)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">//XMLDAOFactory 是RDB 抽象工厂实现</span><br><span class="line">type XMLDAOFactory struct&#123;&#125;</span><br><span class="line"></span><br><span class="line">func (*XMLDAOFactory) CreateOrderMainDAO() OrderMainDAO &#123;</span><br><span class="line">	return &amp;XMLMainDAO&#123;&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">func (*XMLDAOFactory) CreateOrderDetailDAO() OrderDetailDAO &#123;</span><br><span class="line">	return &amp;XMLDetailDAO&#123;&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="策略模式"><a href="#策略模式" class="headerlink" title="策略模式 "></a>策略模式 <a name="策略模式"></a></h3><ul>
+<li>针对接口编程，而不是针对实现编程</li>
+<li>定义了算法族，分别封装起来，让他们之间可以互相替换，此模式让算法变化独立于使用算法的客户</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line">import &quot;fmt&quot;</span><br><span class="line"></span><br><span class="line">type PaymentContext struct &#123;</span><br><span class="line">	Name, CardID string</span><br><span class="line">	Money        int</span><br><span class="line">	payment      PaymentStrategy</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">func NewPaymentContext(name, cardid string, money int, payment PaymentStrategy) *PaymentContext &#123;</span><br><span class="line">	return &amp;PaymentContext&#123;</span><br><span class="line">		Name:    name,</span><br><span class="line">		CardID:  cardid,</span><br><span class="line">		Money:   money,</span><br><span class="line">		payment: payment,</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">func (p *PaymentContext) Pay() &#123;</span><br><span class="line">	p.payment.Pay(p)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">type PaymentStrategy interface &#123;</span><br><span class="line">	Pay(*PaymentContext)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">type Cash struct&#123;&#125;</span><br><span class="line"></span><br><span class="line">func (*Cash) Pay(ctx *PaymentContext) &#123;</span><br><span class="line">	fmt.Printf(&quot;Pay $%d to %s by cash&quot;, ctx.Money, ctx.Name)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">type Bank struct&#123;&#125;</span><br><span class="line"></span><br><span class="line">func (*Bank) Pay(ctx *PaymentContext) &#123;</span><br><span class="line">	fmt.Printf(&quot;Pay $%d to %s by bank account %s&quot;, ctx.Money, ctx.Name, ctx.CardID)</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="观察者模式"><a href="#观察者模式" class="headerlink" title="观察者模式 "></a>观察者模式 <a name="观察者模式"></a></h3><ul>
+<li>定义了对象之间的一对多依赖，这样一来，当一个对象改变状态时，它的所有依赖者都会收到通知并自动更新。</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br></pre></td><td class="code"><pre><span class="line">import &quot;fmt&quot;</span><br><span class="line"></span><br><span class="line">type Subject struct &#123;</span><br><span class="line">	observers []Observer</span><br><span class="line">	context   string</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">func NewSubject() *Subject &#123;</span><br><span class="line">	return &amp;Subject&#123;</span><br><span class="line">		observers: make([]Observer, 0),</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">func (s *Subject) Attach(o Observer) &#123;</span><br><span class="line">	s.observers = append(s.observers, o)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">func (s *Subject) notify() &#123;</span><br><span class="line">	for _, o := range s.observers &#123;</span><br><span class="line">		o.Update(s)</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">func (s *Subject) UpdateContext(context string) &#123;</span><br><span class="line">	s.context = context</span><br><span class="line">	s.notify()</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">type Observer interface &#123;</span><br><span class="line">	Update(*Subject)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">type Reader struct &#123;</span><br><span class="line">	name string</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">func NewReader(name string) *Reader &#123;</span><br><span class="line">	return &amp;Reader&#123;</span><br><span class="line">		name: name,</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">func (r *Reader) Update(s *Subject) &#123;</span><br><span class="line">	fmt.Printf(&quot;%s receive %s\n&quot;, r.name, s.context)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="装饰者模式"><a href="#装饰者模式" class="headerlink" title="装饰者模式 "></a>装饰者模式 <a name="装饰者模式"></a></h3><ul>
+<li>动态地将责任附加到对象上。若要扩展功能，装饰者提供了比继承更具弹性的替代方案。</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br></pre></td><td class="code"><pre><span class="line">type Component interface &#123;</span><br><span class="line">	Calc() int</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">type ConcreteComponent struct&#123;&#125;</span><br><span class="line"></span><br><span class="line">func (*ConcreteComponent) Calc() int &#123;</span><br><span class="line">	return 0</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">type MulDecorator struct &#123;</span><br><span class="line">	Component</span><br><span class="line">	num int</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">func WarpMulDecorator(c Component, num int) Component &#123;</span><br><span class="line">	return &amp;MulDecorator&#123;</span><br><span class="line">		Component: c,</span><br><span class="line">		num:       num,</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">func (d *MulDecorator) Calc() int &#123;</span><br><span class="line">	return d.Component.Calc() * d.num</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">type AddDecorator struct &#123;</span><br><span class="line">	Component</span><br><span class="line">	num int</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">func WarpAddDecorator(c Component, num int) Component &#123;</span><br><span class="line">	return &amp;AddDecorator&#123;</span><br><span class="line">		Component: c,</span><br><span class="line">		num:       num,</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">func (d *AddDecorator) Calc() int &#123;</span><br><span class="line">	return d.Component.Calc() + d.num</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://xuefenghuang.github.io/2019/09/04/2019-09-04-design-patterns-study/" data-id="ck04v12z500083syb05q9afj2" class="article-share-link">Share</a>
+      
+      
+    </footer>
+  </div>
+  
+</article>
+
+
+  
+    <article id="post-2018-01-25-certbot" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2019/09/04/2018-01-25-certbot/" class="article-date">
+  <time datetime="2019-09-04T06:03:48.075Z" itemprop="datePublished">2019-09-04</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2019/09/04/2018-01-25-certbot/">使用certbot为网站免费上https</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>自己做了个网站，由于增加了用户登录注册功能，想用https保护用户隐私。因此，研究如何启用https，本文即是介绍如何在ubuntu上配合Nginx使用CertBot。</p>
+<h1 id="Let’s-Encrypt-及-Certbot-简介"><a href="#Let’s-Encrypt-及-Certbot-简介" class="headerlink" title="Let’s Encrypt 及 Certbot 简介"></a>Let’s Encrypt 及 Certbot 简介</h1><p>Let’s Encrypt 是 一个叫 ISRG （ Internet Security Research Group ，互联网安全研究小组）的组织推出的免费安全证书计划。参与这个计划的组织和公司可以说是互联网顶顶重要的先驱，除了前文提到的三个牛气哄哄的发起单位外，后来又有思科（全球网络设备制造商执牛耳者）、 Akamai 加入，甚至连 Linux 基金会也加入了合作，这些大牌组织的加入保证了这个项目的可信度和可持续性。</p>
+<h1 id="安装Certbot"><a href="#安装Certbot" class="headerlink" title="安装Certbot"></a>安装Certbot</h1><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">$ sudo apt-get update</span><br><span class="line">$ sudo apt-get install software-properties-common</span><br><span class="line">$ sudo add-apt-repository ppa:certbot/certbot</span><br><span class="line">$ sudo apt-get update</span><br><span class="line">$ sudo apt-get install python-certbot-nginx</span><br></pre></td></tr></table></figure>
+
+<h1 id="配置"><a href="#配置" class="headerlink" title="配置"></a>配置</h1><ul>
+<li>如果你的域名下有服务在运行，请运行</li>
+</ul>
+<p><code>$ sudo certbot --authenticator webroot --installer nginx</code></p>
+<ul>
+<li>如果没有，你可以先临时关掉nginx。当获取证书后再重启。</li>
+</ul>
+<p><code>$ sudo certbot --authenticator standalone --installer nginx --pre-hook &quot;nginx -s stop&quot; --post-hook &quot;nginx&quot;</code></p>
+<ul>
+<li>过程中需要输入email, domain信息，还有webroot,这个就是你静态文件的地址（例如/var/www/html)</li>
+</ul>
+<h1 id="自动更新证书"><a href="#自动更新证书" class="headerlink" title="自动更新证书"></a>自动更新证书</h1><p><code>$ sudo certbot renew --dry-run</code></p>
+<ul>
+<li>成功后效果：</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">-------------------------------------------------------------------------------</span><br><span class="line">Processing /etc/letsencrypt/renewal/your.domain.com.conf</span><br><span class="line">-------------------------------------------------------------------------------</span><br><span class="line">** DRY RUN: simulating &apos;certbot renew&apos; close to cert expiry</span><br><span class="line">**          (The test certificates below have not been saved.)</span><br><span class="line"></span><br><span class="line">Congratulations, all renewals succeeded. The following certs have been renewed:</span><br><span class="line">  /etc/letsencrypt/live/your.domain.com/fullchain.pem (success)</span><br><span class="line">** DRY RUN: simulating &apos;certbot renew&apos; close to cert expiry</span><br><span class="line">**          (The test certificates above have not been saved.)</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><p>可以使用<code>crontab -e</code>的命令来启用自动任务</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">sudo crontab -e</span><br><span class="line">添加配置：</span><br><span class="line">00 1 * * 1 /usr/bin/certbot renew  &gt;&gt; /var/log/le-renew.log</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>上面的执行时间为：每周一半夜1点执行renew任务。</p>
+</li>
+<li><p>你可以在命令行执行/usr/bin/certbot renew &gt;&gt; /var/log/le-renew.log看看是否执行正常，如果一切OK，那么我们的配置到此结束</p>
+</li>
+</ul>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://xuefenghuang.github.io/2019/09/04/2018-01-25-certbot/" data-id="ck04v12yn00053syb0bruqa17" class="article-share-link">Share</a>
+      
+      
+    </footer>
+  </div>
+  
+</article>
+
+
+  
+    <article id="post-2019-07-14-kafka-study-record" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2019/09/04/2019-07-14-kafka-study-record/" class="article-date">
+  <time datetime="2019-09-04T06:03:48.075Z" itemprop="datePublished">2019-09-04</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2019/09/04/2019-07-14-kafka-study-record/">kafka学习笔记</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h3 id="选举机制"><a href="#选举机制" class="headerlink" title="选举机制"></a>选举机制</h3><p>Follower通过队列和zxid等顺序标识保证请求的顺序处理，一言不合就会重新同步Leader</p>
+<p>zxid是由epoch和计数器组成。</p>
+<p>leader节点向follower发送心跳信息</p>
+<p>如果zxid,epoch大于自身，就可以投票给leader</p>
+<h3 id="分布式"><a href="#分布式" class="headerlink" title="分布式"></a>分布式</h3><p>partitions的目的有多个.最根本原因是kafka基于文件存储.通过分区,可以将日志内容分散到多个上,来避免文件尺寸达到单机磁盘的上限,每个partiton都会被当前server(kafka实例)保存;可以将一个topic切分多任意多个partitions,来消息保存/消费的效率.此外越多的partitions意味着可以容纳更多的consumer,有效提升并发消费的能力</p>
+<p>offset保证顺序，partitions提高并发数，group提供广播能力，数据存在日志保留2天。</p>
+<h3 id="主从同步"><a href="#主从同步" class="headerlink" title="主从同步"></a>主从同步</h3><p>可异步和同步返回主从结果</p>
+<h3 id="partition"><a href="#partition" class="headerlink" title="partition"></a>partition</h3><p>如果你指定了partition，那就是所有消息发往同1个partition，就是有序的。并且在消费端，Kafka保证，1个partition只能被1个consumer消费。</p>
+<h3 id="为什么高吞吐"><a href="#为什么高吞吐" class="headerlink" title="为什么高吞吐"></a>为什么高吞吐</h3><p>kafka的消息是不断追加到文件中的，这个特性使kafka可以充分利用磁盘的顺序读写性能</p>
+<p>顺序读写不需要硬盘磁头的寻道时间，只需很少的扇区旋转时间，所以速度远快于随机读写</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://xuefenghuang.github.io/2019/09/04/2019-07-14-kafka-study-record/" data-id="ck04v12yo00063sybai221w8e" class="article-share-link">Share</a>
+      
+      
+    </footer>
+  </div>
+  
+</article>
+
+
+  
+    <article id="post-2017-11-13-recommand-algorithm" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2019/09/04/2017-11-13-recommand-algorithm/" class="article-date">
+  <time datetime="2019-09-04T06:03:48.074Z" itemprop="datePublished">2019-09-04</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2019/09/04/2017-11-13-recommand-algorithm/">广告CTR预测算法综述</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h1 id="简述："><a href="#简述：" class="headerlink" title="简述："></a>简述：</h1><ul>
+<li><p>在计算广告系统中，一个可以携带广告请求的用户流量到达后台时，系统需要在较短时间（一般要求不超过100ms）内返回一个或多个排序好的广告列表。在广告系统中，一般最后一步的排序<code>score=bid*pctralpha</code>。其中alpha参数控制排序倾向，如果<code>alpha&lt;1</code>,则倾向于pctr(预测点击率)，否则倾向于bid。</p>
+</li>
+<li><p>在推荐系统中，也有类似的需求，当用户请求到达后台的时候，我们需要返回一个排序好的推荐列表。早期的推荐系统主要以协同过滤和基于内容的推荐为主，近年来推荐系统的主流形式也变成和广告类似的两步走模式：先召回一个候选队列，然后排序；在排序这一步有很多种不同的策略，比如pair-wise的一些分类算法之类，但更多还是类似Youtube之类的计算一个分数，然后排序；这个分数里往往也少不了item的pctr这个关键因子。</p>
+</li>
+<li><p>综上所述，在计算广告、推荐系统等不同业务系统中都对预测项目的点击率有需求，所以很多研究都集中在此，本文将分析这些算法的优缺点。</p>
+</li>
+</ul>
+<h1 id="几种常用点击率模型介绍"><a href="#几种常用点击率模型介绍" class="headerlink" title="几种常用点击率模型介绍"></a>几种常用点击率模型介绍</h1><h2 id="LR"><a href="#LR" class="headerlink" title="LR"></a>LR</h2><ul>
+<li>LR的优点很明确，就是算法简单，易并行和工程化。sigmoid函数的取值范围是0-1，刚好可以解释为点击概率，而输入的范围却可以很宽广，能够处理超高纬度稀疏问题。<br><img src="/images/lr.png" alt="Image of LR"></li>
+<li>但是LR也存在缺点。LR不能很好处理连续型特征，也无法对特征进行组合，因此会带来大量特征工程方面的工作。还有就是LR的训练算法，其中sgd是一种非常通用的优化算法，但实际业务中往往不是最佳选择。原因是因为当函数的取值已经接近于1或0时，函数的梯度方向接近于平行，此时sgd的收敛速度越来越慢。</li>
+</ul>
+<h2 id="GBDT-LR"><a href="#GBDT-LR" class="headerlink" title="GBDT+LR"></a>GBDT+LR</h2><ul>
+<li>该算法是Facebook在2014年发表，是ctr领域里面非常经典的算法。前面提到LR的特征组合问题，实际业务当遇到特征爆炸问题和维度灾难问题时，LR算法可能就会遇到瓶颈。该算法提出了一种解决特征组合问题的方案，基本思路就是利用树模型的组合特性来自动做特征组合，弥补了lr的不足。整体架构如下：<br><img src="/images/gbdt.jpg" alt="Image of GBDT"></li>
+<li>缺点就是很容易过拟合，需要根据业务场景注意在树的棵数和深度上做一定的裁剪，才能平衡精度和过拟合。</li>
+</ul>
+<h2 id="FTRL"><a href="#FTRL" class="headerlink" title="FTRL"></a>FTRL</h2><ul>
+<li>有实验证明，L1-FOBOS这一类基于梯度下降的方法有较高的精度，但是L1-RDA却能在损失一定精度的情况下产生更好的稀疏性。FTRL可以视作RDA和FOBOS的结合，同时具备二者的优点。</li>
+</ul>
+<h2 id="FM"><a href="#FM" class="headerlink" title="FM"></a>FM</h2><ul>
+<li><p>fm是一种可以自有设置特征组合度数的回归算法。</p>
+</li>
+<li><p>Fm的优势是因为可以自动进行特征间的组合，这解决了两个问题，一个是系数数据因为特征组合而能得到不错的 backgroud model 效果；另一个是特征组合解决了人工组合的尴尬，GBDT+LR 与此有异曲同工之妙，因此 FM 常常和 GBDT+LR 来一起讨论；从应用范围来看，业界 GBDT+LR 的使用范围应该是比 FM 要广的；国内我所知只有世纪佳缘 [7]是使用 FM 替代了 GBDT+LR。</p>
+</li>
+<li><p>FM的另一个优点是会算出每个 feature 对应的向量 v；这个向量可以看做对 feature 的一种 embeding，例如后面 WDL 的场景，或者是 GBDT+LR 里对 categorical feature 做 embeding，后者我们正在计划尝试；前者因为可以通过 joint learning 直接学习最佳的 embedding 向量，所以一般不会单独使用 fm 来对 feature 做 embeding。</p>
+</li>
+<li><p>FM的不足之处是在 dense 数据集情况下，反而可能表现不佳，鱼与熊掌不可兼得啊！</p>
+</li>
+</ul>
+<h2 id="WDL"><a href="#WDL" class="headerlink" title="WDL"></a>WDL</h2><ul>
+<li>首先是对 categorical feature 进行 embeding，然后和 continous feature 一起 concatenate 成一个向量，通过三层 relu 网络来做特征的表示学习；另一方面对于 categorical feature 还可以进行人工交叉组合，与左边网络自己学习到的特征一起加入到顶层 lr 模型里作为最终的特征。</li>
+<li>WDL 的缺陷主要体现在两方面，一方面是在线 predict 时的性能瓶颈决定不能使用太宽、太深的网络，另一方面是如果做 online learning</li>
+</ul>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://xuefenghuang.github.io/2019/09/04/2017-11-13-recommand-algorithm/" data-id="ck04v12yl00033syb04hhegp8" class="article-share-link">Share</a>
+      
+      
+    </footer>
+  </div>
+  
+</article>
+
+
+  
+    <article id="post-2018-01-09-lianjia-data-analyse" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2019/09/04/2018-01-09-lianjia-data-analyse/" class="article-date">
+  <time datetime="2019-09-04T06:03:48.074Z" itemprop="datePublished">2019-09-04</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2019/09/04/2018-01-09-lianjia-data-analyse/">利用Python对链家网北京主城区二手房进行数据分析</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <ul>
+<li>本文主要讲述如何通过pandas对爬虫下来的链家数据进行相应的二手房数据分析，主要分析内容包括各个行政区，各个小区的房源信息情况。</li>
+<li>数据来源:  该<a href="https://github.com/XuefengHuang/lianjia-scrawler" target="_blank" rel="noopener">repo</a>提供了python程序进行链家网爬虫，并从中提取二手房价格、面积、户型和二手房关注度等数据。</li>
+<li>本文所用到的代码放在本人的<a href="https://github.com/XuefengHuang/lianjia-scrawler/blob/master/data/lianjia.ipynb" target="_blank" rel="noopener">Github</a>上，便于下载学习。</li>
+<li>分析方法参考 <a href="http://www.jianshu.com/p/44f261a62c0f" target="_blank" rel="noopener">http://www.jianshu.com/p/44f261a62c0f</a></li>
+</ul>
+<h2 id="导入链家网二手房在售房源的文件（数据更新时间2017-11-29）"><a href="#导入链家网二手房在售房源的文件（数据更新时间2017-11-29）" class="headerlink" title="导入链家网二手房在售房源的文件（数据更新时间2017-11-29）"></a>导入链家网二手房在售房源的文件（数据更新时间2017-11-29）</h2><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> pandas <span class="keyword">as</span> pd</span><br><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"><span class="keyword">import</span> matplotlib.pyplot <span class="keyword">as</span> plt</span><br><span class="line"><span class="keyword">from</span> sklearn.cluster <span class="keyword">import</span> KMeans</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> sys</span><br><span class="line"></span><br><span class="line">stdout = sys.stdout</span><br><span class="line">reload(sys)</span><br><span class="line">sys.setdefaultencoding(<span class="string">'utf-8'</span>)</span><br><span class="line">sys.stdout = stdout</span><br><span class="line"></span><br><span class="line">plt.rcParams[<span class="string">'font.sans-serif'</span>] = [<span class="string">'SimHei'</span>]    </span><br><span class="line">plt.rcParams[<span class="string">'axes.unicode_minus'</span>] = <span class="literal">False</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#所有在售房源信息</span></span><br><span class="line">house=pd.read_csv(<span class="string">'houseinfo.csv'</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 所有小区信息</span></span><br><span class="line">community=pd.read_csv(<span class="string">'community.csv'</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 合并小区信息和房源信息表，可以获得房源更详细的地理位置</span></span><br><span class="line">community[<span class="string">'community'</span>] = community[<span class="string">'title'</span>]</span><br><span class="line">house_detail = pd.merge(house, community, on=<span class="string">'community'</span>)</span><br></pre></td></tr></table></figure>
+
+<h2 id="将数据从字符串提取出来"><a href="#将数据从字符串提取出来" class="headerlink" title="将数据从字符串提取出来"></a>将数据从字符串提取出来</h2><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 将字符串转换成数字</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">data_adj</span><span class="params">(area_data, str)</span>:</span>       </span><br><span class="line">    <span class="keyword">if</span> str <span class="keyword">in</span> area_data :        </span><br><span class="line">        <span class="keyword">return</span> float(area_data[<span class="number">0</span> : area_data.find(str)])    </span><br><span class="line">    <span class="keyword">else</span> :        </span><br><span class="line">        <span class="keyword">return</span> <span class="literal">None</span></span><br><span class="line"><span class="comment"># 处理房屋面积数据</span></span><br><span class="line">house[<span class="string">'square'</span>] = house[<span class="string">'square'</span>].apply(data_adj,str = <span class="string">'平米'</span>)</span><br></pre></td></tr></table></figure>
+
+<h2 id="删除车位信息"><a href="#删除车位信息" class="headerlink" title="删除车位信息"></a>删除车位信息</h2><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">car=house[house.housetype.str.contains(<span class="string">'车位'</span>)]</span><br><span class="line"><span class="keyword">print</span> <span class="string">'记录中共有车位%d个'</span>%car.shape[<span class="number">0</span>]</span><br><span class="line">house.drop(car.index,inplace=<span class="literal">True</span>)</span><br><span class="line"><span class="keyword">print</span> <span class="string">'现在还剩下%d条记录'</span>%house.shape[<span class="number">0</span>]</span><br></pre></td></tr></table></figure>
+
+<pre><code>记录中共有车位32个
+现在还剩下16076条记录</code></pre><h2 id="价格最高的5个别墅"><a href="#价格最高的5个别墅" class="headerlink" title="价格最高的5个别墅"></a>价格最高的5个别墅</h2><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">bieshu=house[house.housetype.str.contains(<span class="string">'别墅'</span>)]</span><br><span class="line"><span class="keyword">print</span> <span class="string">'记录中共有别墅%d栋'</span>%bieshu.shape[<span class="number">0</span>]</span><br><span class="line">bieshu.sort_values(<span class="string">'totalPrice'</span>,ascending=<span class="literal">False</span>)[<span class="string">'title'</span>].head()</span><br></pre></td></tr></table></figure>
+
+<pre><code>记录中共有别墅50栋
+
+8020       香山清琴二期独栋别墅，毛坯房原始户型，花园1200平米
+102               千尺独栋 北入户 红顶商人金融界入住社区
+2729    临湖独栋别墅 花园半亩 观景湖面和绿化 满五年有车库房主自荐
+3141           银湖别墅 独栋 望京公园旁 五环里 封闭式社区
+4112           首排别墅 位置好 全景小区绿化和人工湖 有车库
+Name: title, dtype: object</code></pre><h2 id="删除别墅信息"><a href="#删除别墅信息" class="headerlink" title="删除别墅信息"></a>删除别墅信息</h2><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">house.drop(bieshu.index,inplace=<span class="literal">True</span>)</span><br><span class="line"><span class="keyword">print</span> <span class="string">'现在还剩下%d条记录'</span>%house.shape[<span class="number">0</span>]</span><br></pre></td></tr></table></figure>
+
+<pre><code>现在还剩下16026条记录</code></pre><h2 id="获取总价前五的房源信息"><a href="#获取总价前五的房源信息" class="headerlink" title="获取总价前五的房源信息"></a>获取总价前五的房源信息</h2><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">house.sort_values(<span class="string">'totalPrice'</span>,ascending=<span class="literal">False</span>)[<span class="string">'title'</span>].head(<span class="number">5</span>)</span><br></pre></td></tr></table></figure>
+
+<pre><code>8571      中关村创业大街对过 有名的公司入驻其中正规写字楼
+11758    中关村创业大街对过 有名的公司入驻其中正规一层底商
+2480       西山别墅区拥有900平大花园纯独栋社区房主自荐
+14492         盘古大观 大平层 观景房 格局可塑性强！
+10154       朝阳公园内建筑，视野好，可以俯视朝阳公园美景
+Name: title, dtype: object</code></pre><h2 id="获取户型数量分布信息"><a href="#获取户型数量分布信息" class="headerlink" title="获取户型数量分布信息"></a>获取户型数量分布信息</h2><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">housetype = house[<span class="string">'housetype'</span>].value_counts()</span><br><span class="line">housetype.head(<span class="number">8</span>).plot(kind=<span class="string">'bar'</span>,x=<span class="string">'housetype'</span>,y=<span class="string">'size'</span>, title=<span class="string">'户型数量分布'</span>)</span><br><span class="line">plt.legend([<span class="string">'数量'</span>]) </span><br><span class="line">plt.show()</span><br></pre></td></tr></table></figure>
+
+<p><img src="/images/9144104-4132b1de864912b2.png" alt="获取户型数量分布信息"></p>
+<h2 id="关注人数最多5套房子"><a href="#关注人数最多5套房子" class="headerlink" title="关注人数最多5套房子"></a>关注人数最多5套房子</h2><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">house[<span class="string">'guanzhu'</span>] = house[<span class="string">'followInfo'</span>].apply(data_adj,str = <span class="string">'人关注'</span>)</span><br><span class="line">house.sort_values(<span class="string">'guanzhu'</span>,ascending=<span class="literal">False</span>)[<span class="string">'title'</span>].head(<span class="number">5</span>)</span><br></pre></td></tr></table></figure>
+
+<pre><code>47                   弘善家园南向开间，满两年，免增值税
+2313         四惠东 康家园 南向一居室 地铁1号线出行房主自荐
+990     远见名苑  东南两居  满五年家庭唯一住房 诚心出售房主自荐
+2331               荣丰二期朝南复式无遮挡全天采光房主自荐
+915             通州万达北苑地铁站 天时名苑 大两居可改3居
+Name: title, dtype: object</code></pre><h2 id="户型和关注人数分布"><a href="#户型和关注人数分布" class="headerlink" title="户型和关注人数分布"></a>户型和关注人数分布</h2><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">fig, ax1 = plt.subplots(<span class="number">1</span>,<span class="number">1</span>)    </span><br><span class="line">type_interest_group = house[<span class="string">'guanzhu'</span>].groupby(house[<span class="string">'housetype'</span>]).agg([(<span class="string">'户型'</span>, <span class="string">'count'</span>), (<span class="string">'关注人数'</span>, <span class="string">'sum'</span>)])    </span><br><span class="line"><span class="comment">#取户型&gt;50的数据进行可视化</span></span><br><span class="line">ti_sort = type_interest_group[type_interest_group[<span class="string">'户型'</span>] &gt; <span class="number">50</span>].sort_values(by=<span class="string">'户型'</span>)    </span><br><span class="line">ti_sort.plot(kind=<span class="string">'barh'</span>, alpha=<span class="number">0.7</span>, grid=<span class="literal">True</span>, ax=ax1)    </span><br><span class="line">plt.title(<span class="string">'二手房户型和关注人数分布'</span>)    </span><br><span class="line">plt.ylabel(<span class="string">'户型'</span>) </span><br><span class="line">plt.show()</span><br></pre></td></tr></table></figure>
+
+<p><img src="/images/9144104-adfeaae925b049c8.png" alt="户型和关注人数分布"></p>
+<h2 id="面积分布"><a href="#面积分布" class="headerlink" title="面积分布"></a>面积分布</h2><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">fig,ax2 = plt.subplots(<span class="number">1</span>,<span class="number">1</span>)    </span><br><span class="line">area_level = [<span class="number">0</span>, <span class="number">50</span>, <span class="number">100</span>, <span class="number">150</span>, <span class="number">200</span>, <span class="number">250</span>, <span class="number">300</span>, <span class="number">500</span>]    </span><br><span class="line">label_level = [<span class="string">'小于50'</span>, <span class="string">'50-100'</span>, <span class="string">'100-150'</span>, <span class="string">'150-200'</span>, <span class="string">'200-250'</span>, <span class="string">'250-300'</span>, <span class="string">'300-350'</span>]    </span><br><span class="line">area_cut = pd.cut(house[<span class="string">'square'</span>], area_level, labels=label_level)        </span><br><span class="line">area_cut.value_counts().plot(kind=<span class="string">'bar'</span>, rot=<span class="number">30</span>, alpha=<span class="number">0.4</span>, grid=<span class="literal">True</span>, fontsize=<span class="string">'small'</span>, ax=ax2)    </span><br><span class="line">plt.title(<span class="string">'二手房面积分布'</span>)    </span><br><span class="line">plt.xlabel(<span class="string">'面积'</span>)    </span><br><span class="line">plt.legend([<span class="string">'数量'</span>])    </span><br><span class="line">plt.show()</span><br></pre></td></tr></table></figure>
+
+<p><img src="/images/9144104-3c7317acab94caa0.png" alt="面积分布"></p>
+<h2 id="聚类分析"><a href="#聚类分析" class="headerlink" title="聚类分析"></a>聚类分析</h2><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 缺失值处理:直接将缺失值去掉    </span></span><br><span class="line">cluster_data = house[[<span class="string">'guanzhu'</span>,<span class="string">'square'</span>,<span class="string">'totalPrice'</span>]].dropna()    </span><br><span class="line"><span class="comment">#将簇数设为3    </span></span><br><span class="line">K_model = KMeans(n_clusters=<span class="number">3</span>)    </span><br><span class="line">alg = K_model.fit(cluster_data)    </span><br><span class="line"><span class="string">'------聚类中心------'</span>   </span><br><span class="line">center = pd.DataFrame(alg.cluster_centers_, columns=[<span class="string">'关注人数'</span>,<span class="string">'面积'</span>,<span class="string">'房价'</span>])    </span><br><span class="line">cluster_data[<span class="string">'label'</span>] = alg.labels_ </span><br><span class="line">center</span><br></pre></td></tr></table></figure>
+
+<table>
+<thead>
+<tr>
+<th>id</th>
+<th>关注人数</th>
+<th>面积</th>
+<th>房价</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>0</td>
+<td>49.787599</td>
+<td>134.952934</td>
+<td>1138.906738</td>
+</tr>
+<tr>
+<td>1</td>
+<td>48.573579</td>
+<td>256.357676</td>
+<td>2549.974916</td>
+</tr>
+<tr>
+<td>2</td>
+<td>61.485727</td>
+<td>74.484049</td>
+<td>515.354447</td>
+</tr>
+</tbody></table>
+<h2 id="北京市在售面积最小二手房"><a href="#北京市在售面积最小二手房" class="headerlink" title="北京市在售面积最小二手房"></a>北京市在售面积最小二手房</h2><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">house.sort_values(<span class="string">'square'</span>).iloc[<span class="number">0</span>,:]</span><br></pre></td></tr></table></figure>
+
+<pre><code>houseID                                            101102324602
+title                                      智德北巷（北河沿大街）+小户型一居+南向
+link          https://bj.lianjia.com/ershoufang/101102324602...
+community                                                  智德北巷
+years                                          中楼层(共6层)1985年建板楼
+housetype                                                  1室0厅
+square                                                    15.29
+direction                                                     南
+floor                                          中楼层(共6层)1985年建板楼
+taxtype                                          距离5号线灯市口站1113米
+totalPrice                                                  220
+unitPrice                                                143885
+followInfo                               56人关注 / 共2次带看 / 8天以前发布
+validdate                                   2017-11-29 13:23:16
+guanzhu                                                      56
+Name: 15260, dtype: object</code></pre><h2 id="北京市在售面积最大二手房"><a href="#北京市在售面积最大二手房" class="headerlink" title="北京市在售面积最大二手房"></a>北京市在售面积最大二手房</h2><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">house.sort_values(<span class="string">'square'</span>,ascending=<span class="literal">False</span>).iloc[<span class="number">0</span>,:]</span><br></pre></td></tr></table></figure>
+
+<pre><code>houseID                                            101102105035
+title                                  中关村创业大街对过 有名的公司入驻其中正规写字楼
+link          https://bj.lianjia.com/ershoufang/101102105035...
+community                                                  银科大厦
+years                                         低楼层(共22层)2004年建塔楼
+housetype                                                 1房间0卫
+square                                                  2623.28
+direction                                               东 南 西 北
+floor                                         低楼层(共22层)2004年建塔楼
+taxtype                                     距离10号线苏州街站898米房本满五年
+totalPrice                                                12000
+unitPrice                                                 45745
+followInfo                               1人关注 / 共0次带看 / 2个月以前发布
+validdate                                   2017-11-29 14:07:32
+guanzhu                                                       1
+Name: 8571, dtype: object</code></pre><h2 id="各个行政区房源均价"><a href="#各个行政区房源均价" class="headerlink" title="各个行政区房源均价"></a>各个行政区房源均价</h2><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">house_unitprice_perdistrict = house_detail.groupby(<span class="string">'district'</span>).mean()[<span class="string">'unitPrice'</span>]</span><br><span class="line">house_unitprice_perdistrict.plot(kind=<span class="string">'bar'</span>,x=<span class="string">'district'</span>,y=<span class="string">'unitPrice'</span>, title=<span class="string">'各个行政区房源均价'</span>)</span><br><span class="line">plt.legend([<span class="string">'均价'</span>]) </span><br><span class="line">plt.show()</span><br></pre></td></tr></table></figure>
+
+<p><img src="/images/9144104-63b37e70c992f2e2.png" alt="各个行政区房源均价"></p>
+<h2 id="各个区域房源数量排序"><a href="#各个区域房源数量排序" class="headerlink" title="各个区域房源数量排序"></a>各个区域房源数量排序</h2><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">bizcircle_count=house_detail.groupby(<span class="string">'bizcircle'</span>).size().sort_values(ascending=<span class="literal">False</span>)</span><br><span class="line">bizcircle_count.head(<span class="number">20</span>).plot(kind=<span class="string">'bar'</span>,x=<span class="string">'bizcircle'</span>,y=<span class="string">'size'</span>, title=<span class="string">'各个区域房源数量分布'</span>)</span><br><span class="line">plt.legend([<span class="string">'数量'</span>]) </span><br><span class="line">plt.show()</span><br></pre></td></tr></table></figure>
+
+<p><img src="/images/9144104-bf6e4bb4f573c47b.png" alt="各个区域房源数量排序"></p>
+<h2 id="各个区域均价排序"><a href="#各个区域均价排序" class="headerlink" title="各个区域均价排序"></a>各个区域均价排序</h2><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">bizcircle_unitprice=house_detail.groupby(<span class="string">'bizcircle'</span>).mean()[<span class="string">'unitPrice'</span>].sort_values(ascending=<span class="literal">False</span>)</span><br><span class="line">bizcircle_unitprice.head(<span class="number">20</span>).plot(kind=<span class="string">'bar'</span>,x=<span class="string">'bizcircle'</span>,y=<span class="string">'unitPrice'</span>, title=<span class="string">'各个区域均价分布'</span>)</span><br><span class="line">plt.legend([<span class="string">'均价'</span>]) </span><br><span class="line">plt.show()</span><br></pre></td></tr></table></figure>
+
+<p><img src="/images/9144104-b7bb31b1bdd871d8.png" alt="各个区域均价排序"></p>
+<h2 id="各个区域小区数量"><a href="#各个区域小区数量" class="headerlink" title="各个区域小区数量"></a>各个区域小区数量</h2><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">bizcircle_community=community.groupby(<span class="string">'bizcircle'</span>)[<span class="string">'title'</span>].size().sort_values(ascending=<span class="literal">False</span>)</span><br><span class="line">bizcircle_community.head(<span class="number">20</span>).plot(kind=<span class="string">'bar'</span>, x=<span class="string">'bizcircle'</span>,y=<span class="string">'size'</span>, title=<span class="string">'各个区域小区数量分布'</span>)</span><br><span class="line">plt.legend([<span class="string">'数量'</span>]) </span><br><span class="line">plt.show()</span><br></pre></td></tr></table></figure>
+
+<p><img src="/images/9144104-4c5d9fb264c93624.png" alt="各个区域小区数量"></p>
+<h2 id="按小区均价排序"><a href="#按小区均价排序" class="headerlink" title="按小区均价排序"></a>按小区均价排序</h2><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">community_unitprice = house.groupby(<span class="string">'community'</span>).mean()[<span class="string">'unitPrice'</span>].sort_values(ascending=<span class="literal">False</span>)</span><br><span class="line">community_unitprice.head(<span class="number">15</span>).plot(kind=<span class="string">'bar'</span>,x=<span class="string">'community'</span>,y=<span class="string">'unitPrice'</span>, title=<span class="string">'各个小区均价分布'</span>)</span><br><span class="line">plt.legend([<span class="string">'均价'</span>]) </span><br><span class="line">plt.show()</span><br></pre></td></tr></table></figure>
+
+<p><img src="/images/9144104-684e09b1779ebc35.png" alt="小区均价排序"></p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://xuefenghuang.github.io/2019/09/04/2018-01-09-lianjia-data-analyse/" data-id="ck04v12ym00043syb9vtbhri1" class="article-share-link">Share</a>
+      
+      
+    </footer>
+  </div>
+  
+</article>
+
+
+  
+    <article id="post-2017-09-25-collaborate-filter" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2019/09/04/2017-09-25-collaborate-filter/" class="article-date">
+  <time datetime="2019-09-04T06:03:48.073Z" itemprop="datePublished">2019-09-04</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2019/09/04/2017-09-25-collaborate-filter/">协同过滤算法概述</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>通常，协同过滤算法按照数据使用，可以分为：</p>
+<ul>
+<li>基于用户（UserCF）—基于用户相似性</li>
+</ul>
+<p>基于用户的协同过滤，通过不同用户对物品的评分来评测用户之间的相似性，基于用户之间的相似性做出推荐。简单来讲，就是给用户推荐和他兴趣相似的其他用户喜欢的物品。</p>
+<p><img src="/images/usercf.jpeg" alt="Image of UserCF"></p>
+<p>上图示意出基于用户的协同过滤推荐机制的基本原理，假设用户 A 喜欢物品 A，物品 C，用户 B 喜欢物品 B，用户 C 喜欢物品 A ，物品 C 和物品 D；从这些用户的历史喜好信息中，我们可以发现用户 A 和用户 C 的口味和偏好是比较类似的，同时用户 C 还喜欢物品 D，那么我们可以推断用户 A 可能也喜欢物品 D，因此可以将物品 D 推荐给用户 A。</p>
+<ul>
+<li>基于项目（ItemCF）—基于商品相似性</li>
+</ul>
+<p>基于项目的协同过滤，通过用户对不同item的评分来评测item之间的相似性，基于item之间的相似性做出推荐。简单来将，就是给用户推荐和他之前喜欢的物品相似的物品。</p>
+<p><img src="/images/itemcf.jpeg" alt="Image of ItemCF"></p>
+<p>上图示意出基于项目的协同过滤推荐机制的基本原理, 假设用户 A 喜欢物品 A 和物品 C，用户 B 喜欢物品 A，物品 B 和物品 C，用户 C 喜欢物品 A，从这些用户的历史喜好可以分析出物品 A 和物品 C 时比较类似的，喜欢物品 A 的人都喜欢物品 C，基于这个数据可以推断用户 C 很有可能也喜欢物品 C，所以系统会将物品 C 推荐给用户 C。</p>
+<ul>
+<li>基于模型（ModelCF）</li>
+</ul>
+<p>基于模型的协同过滤推荐就是基于样本的用户喜好信息，训练一个推荐模型，然后根据实时的用户喜好的信息进行预测，计算推荐。</p>
+<p>基于模型的方法不像基于邻域的方法，使用用户项评分直接预测新的项。基于模型的方法会在使用评分去学习预测模型的基础上，去预测新项。一般的想法是使用机器学习算法建立用户和项的相互作用模型，从而找出数据中的模式。在一般情况下，基于模型的CF被认为是建立CF推荐系统的更先进的算法。有许多不同的算法可用于构建模型并基于这些模型进行预测，例如，贝叶斯网络、聚类、分类、回归、矩阵分解、受限玻尔兹曼机等等。这些技术在为了最终赢得Netflix奖的解决方案中扮演了关键角色。Netflix发起了一个竞赛，从2006年到2009年提供一百万美元奖金，颁发给产生的推荐比他们自己的推荐系统精确10%以上的推荐系统团队。成功获奖的解决方案是Netflix研发的一个集成（即混合）了超过100种算法模型，这些算法模型都采用了矩阵分解和受限玻尔兹曼机</p>
+<p>Spark MLlib当前支持基于模型的协同过滤，其中用户和商品通过一小组隐性因子进行表达，并且这些因子也用于预测缺失的元素。MLlib使用交替最小二乘法（ALS）来学习这些隐性因子。</p>
+<p>这种ALS算法不像基于用户或者基于物品的协同过滤算法一样，通过计算相似度来进行评分预测和推荐，而是通过矩阵分解的方法来进行预测用户对电影的评分。即如下图所示。</p>
+<p><img src="/images/ALS.jpeg" alt="Image of ItemCF"></p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://xuefenghuang.github.io/2019/09/04/2017-09-25-collaborate-filter/" data-id="ck04v12yk00023sybvgov81sl" class="article-share-link">Share</a>
+      
+      
+    </footer>
+  </div>
+  
+</article>
+
+
+  
+    <article id="post-2017-09-25-book_recommender_system" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2019/09/04/2017-09-25-book_recommender_system/" class="article-date">
+  <time datetime="2019-09-04T06:03:48.072Z" itemprop="datePublished">2019-09-04</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2019/09/04/2017-09-25-book_recommender_system/">基于Spark的在线智能图书推荐系统</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h2 id="项目简介"><a href="#项目简介" class="headerlink" title="项目简介"></a>项目简介</h2><ul>
+<li>基于Spark, Python Flask, 和 <a href="http://www2.informatik.uni-freiburg.de/~cziegler/BX/" target="_blank" rel="noopener">Book-Crossing Dataset</a> 的在线图书推荐系统。</li>
+<li>源代码地址：<a href="https://github.com/XuefengHuang/spark-book-recommender-system。" target="_blank" rel="noopener">https://github.com/XuefengHuang/spark-book-recommender-system。</a> </li>
+<li>适合初学者学习如何搭建一个推荐系统，本文底下附有其他数据，可供参考学习。</li>
+</ul>
+<h2 id="基于模型的协同过滤应用—图书推荐"><a href="#基于模型的协同过滤应用—图书推荐" class="headerlink" title="基于模型的协同过滤应用—图书推荐"></a>基于模型的<a href="https://xuefenghuang.github.io/collaborate-filter/">协同过滤</a>应用—图书推荐</h2><p>本文实现对用户推荐图书的简单应用。</p>
+<ul>
+<li>推荐算法：</li>
+</ul>
+<p>在我们的在线图书推荐系统中，我们借用Spark的ALS算法的训练和预测函数，每次收到新的数据后，将其更新到训练数据集中，然后更新ALS训练得到的模型。</p>
+<p>假设我们有一组用户，他们表现出了对一组图书的喜好。用户对一本图书的喜好程度越高，就会给其更高的评分，范围是从1到5。我们来通过一个矩阵来展示它，行代表用户，列代表图书。用户对图书的评分。所有的评分范围从1到5，5代表喜欢程度最高。第一个用户（行1）对第一个图书（列1）的评分是4。空的单元格代表用户未给图书评价。</p>
+<p><img src="/images/example1.png" alt="Image of Example1"></p>
+<p>矩阵因子分解（如奇异值分解，奇异值分解+ +）将项和用户都转化成了相同的潜在空间，它所代表了用户和项之间的潜相互作用。矩阵分解背后的原理是潜在特征代表了用户如何给项进行评分。给定用户和项的潜在描述，我们可以预测用户将会给还未评价的项多少评分。</p>
+<p><img src="/images/example2.png" alt="Image of Example1"></p>
+<ul>
+<li>数据描述：</li>
+</ul>
+<p>评分数据文件:</p>
+<p><code>&quot;User-ID&quot;;&quot;ISBN&quot;;&quot;Book-Rating&quot;</code></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">&quot;276725&quot;;&quot;034545104X&quot;;&quot;0&quot;</span><br><span class="line">&quot;276726&quot;;&quot;0155061224&quot;;&quot;5&quot;</span><br><span class="line">&quot;276727&quot;;&quot;0446520802&quot;;&quot;0&quot;</span><br><span class="line">&quot;276729&quot;;&quot;052165615X&quot;;&quot;3&quot;</span><br><span class="line">&quot;276729&quot;;&quot;0521795028&quot;;&quot;6&quot;</span><br><span class="line">&quot;276733&quot;;&quot;2080674722&quot;;&quot;0&quot;</span><br><span class="line">&quot;276736&quot;;&quot;3257224281&quot;;&quot;8&quot;</span><br></pre></td></tr></table></figure>
+
+<p>图书数据文件:</p>
+<p><code>&quot;ISBN&quot;;&quot;Book-Title&quot;;&quot;Book-Author&quot;;&quot;Year-Of-Publication&quot;;&quot;Publisher&quot;;&quot;Image-URL-S&quot;;&quot;Image-URL-M&quot;;&quot;Image-URL-L&quot;</code></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">&quot;0195153448&quot;;&quot;Classical Mythology&quot;;&quot;Mark P. O. Morford&quot;;&quot;2002&quot;;&quot;Oxford University Press&quot;;&quot;http://images.amazon.com/images/P/0195153448.01.THUMBZZZ.jpg&quot;;&quot;http://images.amazon.com/images/P/0195153448.01.MZZZZZZZ.jpg&quot;;&quot;http://images.amazon.com/images/P/0195153448.01.LZZZZZZZ.jpg&quot;</span><br><span class="line">&quot;0002005018&quot;;&quot;Clara Callan&quot;;&quot;Richard Bruce Wright&quot;;&quot;2001&quot;;&quot;HarperFlamingo Canada&quot;;&quot;http://images.amazon.com/images/P/0002005018.01.THUMBZZZ.jpg&quot;;&quot;http://images.amazon.com/images/P/0002005018.01.MZZZZZZZ.jpg&quot;;&quot;http://images.amazon.com/images/P/0002005018.01.LZZZZZZZ.jpg&quot;</span><br><span class="line">&quot;0060973129&quot;;&quot;Decision in Normandy&quot;;&quot;Carlo D&apos;Este&quot;;&quot;1991&quot;;&quot;HarperPerennial&quot;;&quot;http://images.amazon.com/images/P/0060973129.01.THUMBZZZ.jpg&quot;;&quot;http://images.amazon.com/images/P/0060973129.01.MZZZZZZZ.jpg&quot;;&quot;http://images.amazon.com/images/P/0060973129.01.LZZZZZZZ.jpg&quot;</span><br><span class="line">&quot;0374157065&quot;;&quot;Flu: The Story of the Great Influenza Pandemic of 1918 and the Search for the Virus That Caused It&quot;;&quot;Gina Bari Kolata&quot;;&quot;1999&quot;;&quot;Farrar Straus Giroux&quot;;&quot;http://images.amazon.com/images/P/0374157065.01.THUMBZZZ.jpg&quot;;&quot;http://images.amazon.com/images/P/0374157065.01.MZZZZZZZ.jpg&quot;;&quot;http://images.amazon.com/images/P/0374157065.01.LZZZZZZZ.jpg&quot;</span><br><span class="line">&quot;0393045218&quot;;&quot;The Mummies of Urumchi&quot;;&quot;E. J. W. Barber&quot;;&quot;1999&quot;;&quot;W. W. Norton &amp;amp; Company&quot;;&quot;http://images.amazon.com/images/P/0393045218.01.THUMBZZZ.jpg&quot;;&quot;http://images.amazon.com/images/P/0393045218.01.MZZZZZZZ.jpg&quot;;&quot;http://images.amazon.com/images/P/0393045218.01.LZZZZZZZ.jpg&quot;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>数据处理细节：</li>
+</ul>
+<p>由于该数据中ISBN为string格式，spark的ALS默认product id为int格式，因此对该ISBN号进行计算hash处理并取前8位防止整数越界。详细代码如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">dataset_path = os.path.join(&apos;datasets&apos;, &apos;BX-CSV-Dump&apos;)</span><br><span class="line">sc = SparkContext(&quot;local[*]&quot;, &quot;Test&quot;)</span><br><span class="line">ratings_file_path = os.path.join(dataset_path, &apos;BX-Book-Ratings.csv&apos;)</span><br><span class="line">ratings_raw_RDD = sc.textFile(ratings_file_path)</span><br><span class="line">ratings_raw_data_header = ratings_raw_RDD.take(1)[0]</span><br><span class="line">ratings_RDD = ratings_raw_RDD.filter(lambda line: line!=ratings_raw_data_header)\</span><br><span class="line">            .map(lambda line: line.split(&quot;;&quot;)).map(lambda tokens: (int(tokens[0][1:-1]), abs(hash(tokens[1][1:-1])) % (10 ** 8),float(tokens[2][1:-1]))).cache()</span><br><span class="line">books_file_path = os.path.join(dataset_path, &apos;BX-Books.csv&apos;)</span><br><span class="line">books_raw_RDD = sc.textFile(books_file_path)</span><br><span class="line">books_raw_data_header = books_raw_RDD.take(1)[0]</span><br><span class="line">books_RDD = books_raw_RDD.filter(lambda line: line!=books_raw_data_header)\</span><br><span class="line">    .map(lambda line: line.split(&quot;;&quot;))\</span><br><span class="line">    .map(lambda tokens: (abs(hash(tokens[0][1:-1])) % (10 ** 8), tokens[1][1:-1], tokens[2][1:-1], tokens[3][1:-1], tokens[4][1:-1], tokens[5][1:-1])).cache()</span><br><span class="line">books_titles_RDD = books_RDD.map(lambda x: (int(x[0]), x[1], x[2], x[3], x[4], x[5])).cache()</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>选择模型参数：</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line">from pyspark.mllib.recommendation import ALS</span><br><span class="line">import math</span><br><span class="line"></span><br><span class="line">seed = 5L</span><br><span class="line">iterations = 10</span><br><span class="line">regularization_parameter = 0.1</span><br><span class="line">ranks = [4, 8, 12]</span><br><span class="line">errors = [0, 0, 0]</span><br><span class="line">err = 0</span><br><span class="line">tolerance = 0.02</span><br><span class="line"></span><br><span class="line">min_error = float(&apos;inf&apos;)</span><br><span class="line">best_rank = -1</span><br><span class="line">best_iteration = -1</span><br><span class="line">for rank in ranks:</span><br><span class="line">    model = ALS.train(training_RDD, rank, seed=seed, iterations=iterations,</span><br><span class="line">                      lambda_=regularization_parameter)</span><br><span class="line">    predictions = model.predictAll(validation_for_predict_RDD).map(lambda r: ((r[0], r[1]), r[2]))</span><br><span class="line">    rates_and_preds = validation_RDD.map(lambda r: ((int(r[0]), int(r[1])), float(r[2]))).join(predictions)</span><br><span class="line">    error = math.sqrt(rates_and_preds.map(lambda r: (r[1][0] - r[1][1])**2).mean())</span><br><span class="line">    errors[err] = error</span><br><span class="line">    err += 1</span><br><span class="line">    print &apos;For rank %s the RMSE is %s&apos; % (rank, error)</span><br><span class="line">    if error &lt; min_error:</span><br><span class="line">        min_error = error</span><br><span class="line">        best_rank = rank</span><br><span class="line">print &apos;The best model was trained with rank %s&apos; % best_rank</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>模型保存</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">from pyspark.mllib.recommendation import MatrixFactorizationModel</span><br><span class="line">model_path = os.path.join(&apos;..&apos;, &apos;models&apos;, &apos;book_als&apos;)</span><br><span class="line">model.save(sc, model_path)</span><br><span class="line">same_model = MatrixFactorizationModel.load(sc, model_path)</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><p>运行说明：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">virtualenv book</span><br><span class="line">pip install -r requirements.txt</span><br><span class="line">python server.py</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>RESTful API:</p>
+</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">GET: /&lt;int:user_id&gt;/ratings/top/&lt;int:count&gt; 获取用户图书推荐top N信息</span><br><span class="line">GET: /&lt;int:user_id&gt;/ratings/&lt;string:book_id&gt; 获取该用户对某个图书的评价信息</span><br><span class="line">POST: /&lt;int:user_id&gt;/ratings 新增图书评价信息</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>接口调用示例：</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line">GET: /276729/ratings/top/3 获取用户ID为276729的图书推荐top3信息</span><br><span class="line">返回信息：</span><br><span class="line"></span><br><span class="line">[</span><br><span class="line">  &#123;</span><br><span class="line">    &quot;Count&quot;: 30,</span><br><span class="line">    &quot;Rating&quot;: 8.781754720405482,</span><br><span class="line">    &quot;Author&quot;: &quot;MARJANE SATRAPI&quot;,</span><br><span class="line">    &quot;URL&quot;: &quot;http://images.amazon.com/images/P/0375422307.01.THUMBZZZ.jpg&quot;,</span><br><span class="line">    &quot;Publisher&quot;: &quot;Pantheon&quot;,</span><br><span class="line">    &quot;Title&quot;: &quot;Persepolis : The Story of a Childhood (Alex Awards (Awards))&quot;,</span><br><span class="line">    &quot;Year&quot;: &quot;2003&quot;</span><br><span class="line">  &#125;,</span><br><span class="line">  &#123;</span><br><span class="line">    &quot;Count&quot;: 31,</span><br><span class="line">    &quot;Rating&quot;: 7.093566643463471,</span><br><span class="line">    &quot;Author&quot;: &quot;Stephen King&quot;,</span><br><span class="line">    &quot;URL&quot;: &quot;http://images.amazon.com/images/P/067081458X.01.THUMBZZZ.jpg&quot;,</span><br><span class="line">    &quot;Publisher&quot;: &quot;Viking Books&quot;,</span><br><span class="line">    &quot;Title&quot;: &quot;The Eyes of the Dragon&quot;,</span><br><span class="line">    &quot;Year&quot;: &quot;1987&quot;</span><br><span class="line">  &#125;,</span><br><span class="line">  &#123;</span><br><span class="line">    &quot;Count&quot;: 25,</span><br><span class="line">    &quot;Rating&quot;: 7.069147186199548,</span><br><span class="line">    &quot;Author&quot;: &quot;Jean Sasson&quot;,</span><br><span class="line">    &quot;URL&quot;: &quot;http://images.amazon.com/images/P/0967673747.01.THUMBZZZ.jpg&quot;,</span><br><span class="line">    &quot;Publisher&quot;: &quot;Windsor-Brooke Books&quot;,</span><br><span class="line">    &quot;Title&quot;: &quot;Princess: A True Story of Life Behind the Veil in Saudi Arabia&quot;,</span><br><span class="line">    &quot;Year&quot;: &quot;2001&quot;</span><br><span class="line">  &#125;</span><br><span class="line">]</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">GET: /276729/ratings/0446520802 获取用户276729对图书(ISBN:0446520802)的评价信息</span><br><span class="line">返回信息：</span><br><span class="line"></span><br><span class="line">[</span><br><span class="line">  &#123;</span><br><span class="line">    &quot;Count&quot;: 116,</span><br><span class="line">    &quot;Rating&quot;: 1.4087434932956826,</span><br><span class="line">    &quot;Author&quot;: &quot;Nicholas Sparks&quot;,</span><br><span class="line">    &quot;URL&quot;: &quot;http://images.amazon.com/images/P/0446520802.01.THUMBZZZ.jpg&quot;,</span><br><span class="line">    &quot;Publisher&quot;: &quot;Warner Books&quot;,</span><br><span class="line">    &quot;Title&quot;: &quot;The Notebook&quot;,</span><br><span class="line">    &quot;Year&quot;: &quot;1996&quot;</span><br><span class="line">  &#125;</span><br><span class="line">]</span><br></pre></td></tr></table></figure>
+
+<h2 id="其他数据集推荐（参考https-gist-github-com-entaroadun-1653794）"><a href="#其他数据集推荐（参考https-gist-github-com-entaroadun-1653794）" class="headerlink" title="其他数据集推荐（参考https://gist.github.com/entaroadun/1653794）"></a>其他数据集推荐（参考<a href="https://gist.github.com/entaroadun/1653794）" target="_blank" rel="noopener">https://gist.github.com/entaroadun/1653794）</a></h2><p>以下数据可以提供给初学者学习如何训练推荐算法模型</p>
+<p><strong>电影数据</strong>:</p>
+<ul>
+<li><em>MovieLens</em> - Movie Recommendation Data Sets <a href="http://www.grouplens.org/node/73" target="_blank" rel="noopener">http://www.grouplens.org/node/73</a></li>
+<li><em>Yahoo!</em> - Movie, Music, and Images Ratings Data Sets <a href="http://webscope.sandbox.yahoo.com/catalog.php?datatype=r" target="_blank" rel="noopener">http://webscope.sandbox.yahoo.com/catalog.php?datatype=r</a></li>
+<li><em>Cornell University</em> - Movie-review data for use in sentiment-analysis experiments <a href="http://www.cs.cornell.edu/people/pabo/movie-review-data/" target="_blank" rel="noopener">http://www.cs.cornell.edu/people/pabo/movie-review-data/</a></li>
+</ul>
+<p><strong>音乐数据</strong>:</p>
+<ul>
+<li><em>Last.fm</em> - Music Recommendation Data Sets <a href="http://www.dtic.upf.edu/~ocelma/MusicRecommendationDataset/index.html" target="_blank" rel="noopener">http://www.dtic.upf.edu/~ocelma/MusicRecommendationDataset/index.html</a></li>
+<li><em>Yahoo!</em> - Movie, Music, and Images Ratings Data Sets <a href="http://webscope.sandbox.yahoo.com/catalog.php?datatype=r" target="_blank" rel="noopener">http://webscope.sandbox.yahoo.com/catalog.php?datatype=r</a></li>
+<li><em>Audioscrobbler</em> - Music Recommendation Data Sets <a href="http://www-etud.iro.umontreal.ca/~bergstrj/audioscrobbler_data.html" target="_blank" rel="noopener">http://www-etud.iro.umontreal.ca/~bergstrj/audioscrobbler_data.html</a></li>
+<li><em>Amazon</em> - Audio CD recommendations <a href="http://131.193.40.52/data/" target="_blank" rel="noopener">http://131.193.40.52/data/</a></li>
+</ul>
+<p><strong>图书数据</strong>:</p>
+<ul>
+<li><em>Institut für Informatik, Universität Freiburg</em> - Book Ratings Data Sets <a href="http://www.informatik.uni-freiburg.de/~cziegler/BX/" target="_blank" rel="noopener">http://www.informatik.uni-freiburg.de/~cziegler/BX/</a></li>
+</ul>
+<p><strong>美食数据</strong>:</p>
+<ul>
+<li><em>Chicago Entree</em> - Food Ratings Data Sets <a href="http://archive.ics.uci.edu/ml/datasets/Entree+Chicago+Recommendation+Data" target="_blank" rel="noopener">http://archive.ics.uci.edu/ml/datasets/Entree+Chicago+Recommendation+Data</a></li>
+</ul>
+<p><strong>商品数据</strong>:</p>
+<ul>
+<li><em>Amazon</em> - Product Recommendation Data Sets <a href="http://131.193.40.52/data/" target="_blank" rel="noopener">http://131.193.40.52/data/</a></li>
+</ul>
+<p><strong>健康数据</strong>:</p>
+<ul>
+<li><em>Nursing Home</em> - Provider Ratings Data Set <a href="http://data.medicare.gov/dataset/Nursing-Home-Compare-Provider-Ratings/mufm-vy8d" target="_blank" rel="noopener">http://data.medicare.gov/dataset/Nursing-Home-Compare-Provider-Ratings/mufm-vy8d</a></li>
+<li><em>Hospital Ratings</em> - Survey of Patients Hospital Experiences <a href="http://data.medicare.gov/dataset/Survey-of-Patients-Hospital-Experiences-HCAHPS-/rj76-22dk" target="_blank" rel="noopener">http://data.medicare.gov/dataset/Survey-of-Patients-Hospital-Experiences-HCAHPS-/rj76-22dk</a></li>
+</ul>
+<p><strong>相亲数据</strong>:</p>
+<ul>
+<li><em><a href="http://www.libimseti.cz" target="_blank" rel="noopener">www.libimseti.cz</a></em> - Dating website recommendation (collaborative filtering) <a href="http://www.occamslab.com/petricek/data/" target="_blank" rel="noopener">http://www.occamslab.com/petricek/data/</a></li>
+</ul>
+<p><strong>学术文章推荐</strong>:</p>
+<ul>
+<li><em>National University of Singapore</em> - Scholarly Paper Recommendation <a href="http://www.comp.nus.edu.sg/~sugiyama/SchPaperRecData.html" target="_blank" rel="noopener">http://www.comp.nus.edu.sg/~sugiyama/SchPaperRecData.html</a></li>
+</ul>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://xuefenghuang.github.io/2019/09/04/2017-09-25-book_recommender_system/" data-id="ck04v12yi00013syb3mclbppz" class="article-share-link">Share</a>
+      
+      
+    </footer>
+  </div>
+  
+</article>
+
+
+  
+    <article id="post-2017-05-15-lianjia_scrawler" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2019/09/04/2017-05-15-lianjia_scrawler/" class="article-date">
+  <time datetime="2019-09-04T06:03:48.071Z" itemprop="datePublished">2019-09-04</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2019/09/04/2017-05-15-lianjia_scrawler/">使用python抓取并用kibana分析数据—链家网</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>本篇文章介绍如何使用python(requests+BeautifulSoup)的方法对页面进行抓取和数据提取。通过使用requests库对链家网二手房列表页进行抓取，通过BeautifulSoup对页面进行解析，并从中获取房源价格，面积，户型和关注度的数据。</p>
+<h1 id="准备工作"><a href="#准备工作" class="headerlink" title="准备工作"></a>准备工作</h1><ul>
+<li>为了方便数据库建表读写，我们使用python ORM工具<a href="https://github.com/coleifer/peewee" target="_blank" rel="noopener">Peewee</a>。并且使用BeautifulSoup+Requests对页面进行抓取和数据提取。具体所需依赖包如下</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">appdirs==1.4.3</span><br><span class="line">beautifulsoup4==4.5.3</span><br><span class="line">bs4==0.0.1</span><br><span class="line">lxml==3.7.3</span><br><span class="line">MySQL-python==1.2.5</span><br><span class="line">packaging==16.8</span><br><span class="line">peewee==2.8.0</span><br><span class="line">psycopg2==2.7.1</span><br><span class="line">pyparsing==2.2.0</span><br><span class="line">requests==2.13.0</span><br><span class="line">six==1.10.0</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>该工具使用python对链家网页面进行数据抓取，然后存到数据库中，目前支持三种数据库类型（MYSQL，Postgres，SQLite）。由于我们是中文存储，所以在配置数据库时注意设置UTF-8格式。可以参考此<a href="https://github.com/XuefengHuang/lianjia-scrawler/issues/1" target="_blank" rel="noopener">问题</a>。<br>数据库配置如下(<a href="https://github.com/XuefengHuang/lianjia-scrawler/blob/master/config.ini" target="_blank" rel="noopener">config.ini</a>):</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">[Mysql]</span><br><span class="line">enable = True</span><br><span class="line">scheme = test</span><br><span class="line">host = 127.0.0.1</span><br><span class="line">port = 3306</span><br><span class="line">user = root</span><br><span class="line">password = </span><br><span class="line"></span><br><span class="line">[Sqlite]</span><br><span class="line">enable = False</span><br><span class="line">dbname = lianjia.db</span><br><span class="line"></span><br><span class="line">[Postgresql]</span><br><span class="line">enable = False</span><br><span class="line">scheme = database_name</span><br><span class="line">host = db.mysite.com</span><br><span class="line">user = postgres</span><br><span class="line">password = secret</span><br></pre></td></tr></table></figure>
+
+<h1 id="页面爬虫"><a href="#页面爬虫" class="headerlink" title="页面爬虫"></a>页面爬虫</h1><ul>
+<li>开始抓取前先观察下目标页面或网站的结构，其中比较重要的是URL的结构。链家网的二手房列表页面共有100个，URL结构为<a href="http://bj.lianjia.com/ershoufang/pg9/，其中bj表示城市，/ershoufang/是频道名称，pg9是页面码。我们要抓取的是北京的二手房频道，所以前面的部分不会变，属于固定部分，后面的页面码需要在1-100间变化，属于可变部分。将URL分为两部分，前面的固定部分赋值给url，后面的可变部分使用for循环。我们以根据小区名字搜索二手房出售情况为例：" target="_blank" rel="noopener">http://bj.lianjia.com/ershoufang/pg9/，其中bj表示城市，/ershoufang/是频道名称，pg9是页面码。我们要抓取的是北京的二手房频道，所以前面的部分不会变，属于固定部分，后面的页面码需要在1-100间变化，属于可变部分。将URL分为两部分，前面的固定部分赋值给url，后面的可变部分使用for循环。我们以根据小区名字搜索二手房出售情况为例：</a></li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">BASE_URL = u&quot;http://bj.lianjia.com/&quot;</span><br><span class="line">url = BASE_URL + u&quot;ershoufang/rs&quot; + urllib2.quote(communityname.encode(&apos;utf8&apos;)) + &quot;/&quot;</span><br><span class="line">total_pages = misc.get_total_pages(url) //获取总页数信息</span><br><span class="line">for page in range(total_pages):</span><br><span class="line">    if page &gt; 0:</span><br><span class="line">        url_page = BASE_URL + u&quot;ershoufang/pg%drs%s/&quot; % (page+1, urllib2.quote(communityname.encode(&apos;utf8&apos;)))</span><br><span class="line"></span><br><span class="line">//获取总页数信息代码</span><br><span class="line">def get_total_pages(url):</span><br><span class="line">    source_code = get_source_code(url)</span><br><span class="line">    soup = BeautifulSoup(source_code, &apos;lxml&apos;)</span><br><span class="line">    total_pages = 0</span><br><span class="line">    try:</span><br><span class="line">        page_info = soup.find(&apos;div&apos;,&#123;&apos;class&apos;:&apos;page-box house-lst-page-box&apos;&#125;)</span><br><span class="line">    except AttributeError as e:</span><br><span class="line">        page_info = None</span><br><span class="line"></span><br><span class="line">    if page_info == None:</span><br><span class="line">        return None</span><br><span class="line">    page_info_str = page_info.get(&apos;page-data&apos;).split(&apos;,&apos;)[0]  #&apos;&#123;&quot;totalPage&quot;:5,&quot;curPage&quot;:1&#125;&apos;</span><br><span class="line">    total_pages = int(page_info_str.split(&apos;:&apos;)[1])</span><br><span class="line">    return total_pages</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>页面抓取完成后无法直接阅读和进行数据提取，还需要进行页面解析。我们使用BeautifulSoup对页面进行解析。</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">soup = BeautifulSoup(source_code, &apos;lxml&apos;)</span><br><span class="line">nameList = soup.findAll(&quot;li&quot;, &#123;&quot;class&quot;:&quot;clear&quot;&#125;)</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>完成页面解析后就可以对页面中的关键信息进行提取了。下面我们分别对房源各个信息进行提取。</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line">for name in nameList: # per house loop</span><br><span class="line">    i = i + 1</span><br><span class="line">    info_dict = &#123;&#125;</span><br><span class="line">    try:</span><br><span class="line">        housetitle = name.find(&quot;div&quot;, &#123;&quot;class&quot;:&quot;title&quot;&#125;)</span><br><span class="line">        info_dict.update(&#123;u&apos;title&apos;:housetitle.get_text().strip()&#125;)</span><br><span class="line">        info_dict.update(&#123;u&apos;link&apos;:housetitle.a.get(&apos;href&apos;)&#125;)</span><br><span class="line"></span><br><span class="line">        houseaddr = name.find(&quot;div&quot;, &#123;&quot;class&quot;:&quot;address&quot;&#125;)</span><br><span class="line">        info = houseaddr.div.get_text().split(&apos;|&apos;)</span><br><span class="line">        info_dict.update(&#123;u&apos;community&apos;:info[0].strip()&#125;)</span><br><span class="line">        info_dict.update(&#123;u&apos;housetype&apos;:info[1].strip()&#125;)</span><br><span class="line">        info_dict.update(&#123;u&apos;square&apos;:info[2].strip()&#125;)</span><br><span class="line">        info_dict.update(&#123;u&apos;direction&apos;:info[3].strip()&#125;)</span><br><span class="line"></span><br><span class="line">        housefloor = name.find(&quot;div&quot;, &#123;&quot;class&quot;:&quot;flood&quot;&#125;)</span><br><span class="line">        floor_all = housefloor.div.get_text().split(&apos;-&apos;)[0].strip().split(&apos; &apos;)</span><br><span class="line">        info_dict.update(&#123;u&apos;floor&apos;:floor_all[0].strip()&#125;)</span><br><span class="line">        info_dict.update(&#123;u&apos;years&apos;:floor_all[-1].strip()&#125;)</span><br><span class="line"></span><br><span class="line">        followInfo = name.find(&quot;div&quot;, &#123;&quot;class&quot;:&quot;followInfo&quot;&#125;)</span><br><span class="line">        info_dict.update(&#123;u&apos;followInfo&apos;:followInfo.get_text()&#125;)</span><br><span class="line"></span><br><span class="line">        tax = name.find(&quot;div&quot;, &#123;&quot;class&quot;:&quot;tag&quot;&#125;)</span><br><span class="line">        info_dict.update(&#123;u&apos;taxtype&apos;:tax.get_text().strip()&#125;)</span><br><span class="line"></span><br><span class="line">        totalPrice = name.find(&quot;div&quot;, &#123;&quot;class&quot;:&quot;totalPrice&quot;&#125;)</span><br><span class="line">        info_dict.update(&#123;u&apos;totalPrice&apos;:int(totalPrice.span.get_text())&#125;)</span><br><span class="line"></span><br><span class="line">        unitPrice = name.find(&quot;div&quot;, &#123;&quot;class&quot;:&quot;unitPrice&quot;&#125;)</span><br><span class="line">        info_dict.update(&#123;u&apos;unitPrice&apos;:int(unitPrice.get(&apos;data-price&apos;))&#125;)</span><br><span class="line">        info_dict.update(&#123;u&apos;houseID&apos;:unitPrice.get(&apos;data-hid&apos;)&#125;)</span><br><span class="line">    except:</span><br><span class="line">        continue</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>提取完后，为了之后数据分析，要存进之前配置的数据库中。</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">model.Houseinfo.insert(**info_dict).upsert().execute()</span><br><span class="line">model.Hisprice.insert(houseID=info_dict[&apos;houseID&apos;], totalPrice=info_dict[&apos;totalPrice&apos;]).upsert().execute()</span><br></pre></td></tr></table></figure>
+
+<h1 id="数据分析"><a href="#数据分析" class="headerlink" title="数据分析"></a>数据分析</h1><ul>
+<li>什么是<a href="https://www.elastic.co/products/kibana" target="_blank" rel="noopener">Kibana</a>：</li>
+</ul>
+<p>Kibana是一个开源的分析与可视化平台，设计出来用于和Elasticsearch一起使用的。你可以用kibana搜索、查看、交互存放在Elasticsearch索引里的数据，使用各种不同的图表、表格、地图等kibana能够很轻易地展示高级数据分析与可视化。</p>
+<p>Kibana让我们理解大量数据变得很容易。它简单、基于浏览器的接口使你能快速创建和分享实时展现Elasticsearch查询变化的动态仪表盘。安装Kibana非常快，你可以在几分钟之内安装和开始探索你的Elasticsearch索引数据—-—-不需要写任何代码，没有其他基础软件依赖。</p>
+<ul>
+<li><p>Mysql数据同步到Elasticsearch：<br>正如上面所介绍，如果想用kibana分析数据，必须把数据导入Elasticsearch。此<a href="https://github.com/siddontang/go-mysql-elasticsearch" target="_blank" rel="noopener">工具</a>可以帮助你轻松进行mysql到es的数据同步。</p>
+</li>
+<li><p>样例：<br><img src="/images/lianjia1.png" alt="alt text1"><br><img src="/images/lianjia2.png" alt="alt text2"><br><img src="/images/lianjia3.png" alt="alt text3"></p>
+</li>
+</ul>
+<p>更多信息请参考github<a href="https://github.com/XuefengHuang/lianjia-scrawler" target="_blank" rel="noopener">链家爬虫源代码</a>。</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://xuefenghuang.github.io/2019/09/04/2017-05-15-lianjia_scrawler/" data-id="ck04v12yd00003syb2q3d6m8r" class="article-share-link">Share</a>
+      
+      
+    </footer>
+  </div>
+  
+</article>
+
+
+  
+    <article id="post-hello-world" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2019/09/04/hello-world/" class="article-date">
+  <time datetime="2019-09-04T06:01:19.187Z" itemprop="datePublished">2019-09-04</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2019/09/04/hello-world/">Hello World</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>Welcome to <a href="https://hexo.io/" target="_blank" rel="noopener">Hexo</a>! This is your very first post. Check <a href="https://hexo.io/docs/" target="_blank" rel="noopener">documentation</a> for more info. If you get any problems when using Hexo, you can find the answer in <a href="https://hexo.io/docs/troubleshooting.html" target="_blank" rel="noopener">troubleshooting</a> or you can ask me on <a href="https://github.com/hexojs/hexo/issues" target="_blank" rel="noopener">GitHub</a>.</p>
+<h2 id="Quick-Start"><a href="#Quick-Start" class="headerlink" title="Quick Start"></a>Quick Start</h2><h3 id="Create-a-new-post"><a href="#Create-a-new-post" class="headerlink" title="Create a new post"></a>Create a new post</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo new <span class="string">"My New Post"</span></span><br></pre></td></tr></table></figure>
+
+<p>More info: <a href="https://hexo.io/docs/writing.html" target="_blank" rel="noopener">Writing</a></p>
+<h3 id="Run-server"><a href="#Run-server" class="headerlink" title="Run server"></a>Run server</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo server</span><br></pre></td></tr></table></figure>
+
+<p>More info: <a href="https://hexo.io/docs/server.html" target="_blank" rel="noopener">Server</a></p>
+<h3 id="Generate-static-files"><a href="#Generate-static-files" class="headerlink" title="Generate static files"></a>Generate static files</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo generate</span><br></pre></td></tr></table></figure>
+
+<p>More info: <a href="https://hexo.io/docs/generating.html" target="_blank" rel="noopener">Generating</a></p>
+<h3 id="Deploy-to-remote-sites"><a href="#Deploy-to-remote-sites" class="headerlink" title="Deploy to remote sites"></a>Deploy to remote sites</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo deploy</span><br></pre></td></tr></table></figure>
+
+<p>More info: <a href="https://hexo.io/docs/deployment.html" target="_blank" rel="noopener">Deployment</a></p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://xuefenghuang.github.io/2019/09/04/hello-world/" data-id="ck04v12z700093sybc7l09k7d" class="article-share-link">Share</a>
+      
+      
+    </footer>
+  </div>
+  
+</article>
+
+
+  
+
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+
+  
+    
+
+  
+    
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archives</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/09/">September 2019</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Recent Posts</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2019/09/04/2019-07-14-redis-study-record/">redis学习笔记</a>
+          </li>
+        
+          <li>
+            <a href="/2019/09/04/2019-09-04-design-patterns-study/">go语言设计模式学习笔记</a>
+          </li>
+        
+          <li>
+            <a href="/2019/09/04/2018-01-25-certbot/">使用certbot为网站免费上https</a>
+          </li>
+        
+          <li>
+            <a href="/2019/09/04/2019-07-14-kafka-study-record/">kafka学习笔记</a>
+          </li>
+        
+          <li>
+            <a href="/2019/09/04/2017-11-13-recommand-algorithm/">广告CTR预测算法综述</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      &copy; 2019 Xuefeng Huang<br>
+      Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+
+
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+<script src="/js/script.js"></script>
+
+
+
+  </div>
+</body>
+</html>

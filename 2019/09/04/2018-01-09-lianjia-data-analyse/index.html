@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html>
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="utf-8">
+  
+
+  
+  <title>利用Python对链家网北京主城区二手房进行数据分析 | 博客</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="本文主要讲述如何通过pandas对爬虫下来的链家数据进行相应的二手房数据分析，主要分析内容包括各个行政区，各个小区的房源信息情况。 数据来源:  该repo提供了python程序进行链家网爬虫，并从中提取二手房价格、面积、户型和二手房关注度等数据。 本文所用到的代码放在本人的Github上，便于下载学习。 分析方法参考 http://www.jianshu.com/p/44f261a62c0f">
+<meta property="og:type" content="article">
+<meta property="og:title" content="利用Python对链家网北京主城区二手房进行数据分析">
+<meta property="og:url" content="http://xuefenghuang.github.io/2019/09/04/2018-01-09-lianjia-data-analyse/index.html">
+<meta property="og:site_name" content="博客">
+<meta property="og:description" content="本文主要讲述如何通过pandas对爬虫下来的链家数据进行相应的二手房数据分析，主要分析内容包括各个行政区，各个小区的房源信息情况。 数据来源:  该repo提供了python程序进行链家网爬虫，并从中提取二手房价格、面积、户型和二手房关注度等数据。 本文所用到的代码放在本人的Github上，便于下载学习。 分析方法参考 http://www.jianshu.com/p/44f261a62c0f">
+<meta property="og:locale" content="en">
+<meta property="og:image" content="http://xuefenghuang.github.io/images/9144104-4132b1de864912b2.png">
+<meta property="og:image" content="http://xuefenghuang.github.io/images/9144104-adfeaae925b049c8.png">
+<meta property="og:image" content="http://xuefenghuang.github.io/images/9144104-3c7317acab94caa0.png">
+<meta property="og:image" content="http://xuefenghuang.github.io/images/9144104-63b37e70c992f2e2.png">
+<meta property="og:image" content="http://xuefenghuang.github.io/images/9144104-bf6e4bb4f573c47b.png">
+<meta property="og:image" content="http://xuefenghuang.github.io/images/9144104-b7bb31b1bdd871d8.png">
+<meta property="og:image" content="http://xuefenghuang.github.io/images/9144104-4c5d9fb264c93624.png">
+<meta property="og:image" content="http://xuefenghuang.github.io/images/9144104-684e09b1779ebc35.png">
+<meta property="og:updated_time" content="2019-09-04T06:03:48.074Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="利用Python对链家网北京主城区二手房进行数据分析">
+<meta name="twitter:description" content="本文主要讲述如何通过pandas对爬虫下来的链家数据进行相应的二手房数据分析，主要分析内容包括各个行政区，各个小区的房源信息情况。 数据来源:  该repo提供了python程序进行链家网爬虫，并从中提取二手房价格、面积、户型和二手房关注度等数据。 本文所用到的代码放在本人的Github上，便于下载学习。 分析方法参考 http://www.jianshu.com/p/44f261a62c0f">
+<meta name="twitter:image" content="http://xuefenghuang.github.io/images/9144104-4132b1de864912b2.png">
+  
+    <link rel="alternate" href="/atom.xml" title="博客" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  
+    <link href="//fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
+  
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+</html>
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">博客</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="Search"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://xuefenghuang.github.io"></form>
+      </div>
+    </div>
+  </div>
+</header>
+      <div class="outer">
+        <section id="main"><article id="post-2018-01-09-lianjia-data-analyse" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2019/09/04/2018-01-09-lianjia-data-analyse/" class="article-date">
+  <time datetime="2019-09-04T06:03:48.074Z" itemprop="datePublished">2019-09-04</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      利用Python对链家网北京主城区二手房进行数据分析
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <ul>
+<li>本文主要讲述如何通过pandas对爬虫下来的链家数据进行相应的二手房数据分析，主要分析内容包括各个行政区，各个小区的房源信息情况。</li>
+<li>数据来源:  该<a href="https://github.com/XuefengHuang/lianjia-scrawler" target="_blank" rel="noopener">repo</a>提供了python程序进行链家网爬虫，并从中提取二手房价格、面积、户型和二手房关注度等数据。</li>
+<li>本文所用到的代码放在本人的<a href="https://github.com/XuefengHuang/lianjia-scrawler/blob/master/data/lianjia.ipynb" target="_blank" rel="noopener">Github</a>上，便于下载学习。</li>
+<li>分析方法参考 <a href="http://www.jianshu.com/p/44f261a62c0f" target="_blank" rel="noopener">http://www.jianshu.com/p/44f261a62c0f</a></li>
+</ul>
+<h2 id="导入链家网二手房在售房源的文件（数据更新时间2017-11-29）"><a href="#导入链家网二手房在售房源的文件（数据更新时间2017-11-29）" class="headerlink" title="导入链家网二手房在售房源的文件（数据更新时间2017-11-29）"></a>导入链家网二手房在售房源的文件（数据更新时间2017-11-29）</h2><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> pandas <span class="keyword">as</span> pd</span><br><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"><span class="keyword">import</span> matplotlib.pyplot <span class="keyword">as</span> plt</span><br><span class="line"><span class="keyword">from</span> sklearn.cluster <span class="keyword">import</span> KMeans</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> sys</span><br><span class="line"></span><br><span class="line">stdout = sys.stdout</span><br><span class="line">reload(sys)</span><br><span class="line">sys.setdefaultencoding(<span class="string">'utf-8'</span>)</span><br><span class="line">sys.stdout = stdout</span><br><span class="line"></span><br><span class="line">plt.rcParams[<span class="string">'font.sans-serif'</span>] = [<span class="string">'SimHei'</span>]    </span><br><span class="line">plt.rcParams[<span class="string">'axes.unicode_minus'</span>] = <span class="literal">False</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#所有在售房源信息</span></span><br><span class="line">house=pd.read_csv(<span class="string">'houseinfo.csv'</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 所有小区信息</span></span><br><span class="line">community=pd.read_csv(<span class="string">'community.csv'</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 合并小区信息和房源信息表，可以获得房源更详细的地理位置</span></span><br><span class="line">community[<span class="string">'community'</span>] = community[<span class="string">'title'</span>]</span><br><span class="line">house_detail = pd.merge(house, community, on=<span class="string">'community'</span>)</span><br></pre></td></tr></table></figure>
+
+<h2 id="将数据从字符串提取出来"><a href="#将数据从字符串提取出来" class="headerlink" title="将数据从字符串提取出来"></a>将数据从字符串提取出来</h2><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 将字符串转换成数字</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">data_adj</span><span class="params">(area_data, str)</span>:</span>       </span><br><span class="line">    <span class="keyword">if</span> str <span class="keyword">in</span> area_data :        </span><br><span class="line">        <span class="keyword">return</span> float(area_data[<span class="number">0</span> : area_data.find(str)])    </span><br><span class="line">    <span class="keyword">else</span> :        </span><br><span class="line">        <span class="keyword">return</span> <span class="literal">None</span></span><br><span class="line"><span class="comment"># 处理房屋面积数据</span></span><br><span class="line">house[<span class="string">'square'</span>] = house[<span class="string">'square'</span>].apply(data_adj,str = <span class="string">'平米'</span>)</span><br></pre></td></tr></table></figure>
+
+<h2 id="删除车位信息"><a href="#删除车位信息" class="headerlink" title="删除车位信息"></a>删除车位信息</h2><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">car=house[house.housetype.str.contains(<span class="string">'车位'</span>)]</span><br><span class="line"><span class="keyword">print</span> <span class="string">'记录中共有车位%d个'</span>%car.shape[<span class="number">0</span>]</span><br><span class="line">house.drop(car.index,inplace=<span class="literal">True</span>)</span><br><span class="line"><span class="keyword">print</span> <span class="string">'现在还剩下%d条记录'</span>%house.shape[<span class="number">0</span>]</span><br></pre></td></tr></table></figure>
+
+<pre><code>记录中共有车位32个
+现在还剩下16076条记录</code></pre><h2 id="价格最高的5个别墅"><a href="#价格最高的5个别墅" class="headerlink" title="价格最高的5个别墅"></a>价格最高的5个别墅</h2><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">bieshu=house[house.housetype.str.contains(<span class="string">'别墅'</span>)]</span><br><span class="line"><span class="keyword">print</span> <span class="string">'记录中共有别墅%d栋'</span>%bieshu.shape[<span class="number">0</span>]</span><br><span class="line">bieshu.sort_values(<span class="string">'totalPrice'</span>,ascending=<span class="literal">False</span>)[<span class="string">'title'</span>].head()</span><br></pre></td></tr></table></figure>
+
+<pre><code>记录中共有别墅50栋
+
+8020       香山清琴二期独栋别墅，毛坯房原始户型，花园1200平米
+102               千尺独栋 北入户 红顶商人金融界入住社区
+2729    临湖独栋别墅 花园半亩 观景湖面和绿化 满五年有车库房主自荐
+3141           银湖别墅 独栋 望京公园旁 五环里 封闭式社区
+4112           首排别墅 位置好 全景小区绿化和人工湖 有车库
+Name: title, dtype: object</code></pre><h2 id="删除别墅信息"><a href="#删除别墅信息" class="headerlink" title="删除别墅信息"></a>删除别墅信息</h2><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">house.drop(bieshu.index,inplace=<span class="literal">True</span>)</span><br><span class="line"><span class="keyword">print</span> <span class="string">'现在还剩下%d条记录'</span>%house.shape[<span class="number">0</span>]</span><br></pre></td></tr></table></figure>
+
+<pre><code>现在还剩下16026条记录</code></pre><h2 id="获取总价前五的房源信息"><a href="#获取总价前五的房源信息" class="headerlink" title="获取总价前五的房源信息"></a>获取总价前五的房源信息</h2><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">house.sort_values(<span class="string">'totalPrice'</span>,ascending=<span class="literal">False</span>)[<span class="string">'title'</span>].head(<span class="number">5</span>)</span><br></pre></td></tr></table></figure>
+
+<pre><code>8571      中关村创业大街对过 有名的公司入驻其中正规写字楼
+11758    中关村创业大街对过 有名的公司入驻其中正规一层底商
+2480       西山别墅区拥有900平大花园纯独栋社区房主自荐
+14492         盘古大观 大平层 观景房 格局可塑性强！
+10154       朝阳公园内建筑，视野好，可以俯视朝阳公园美景
+Name: title, dtype: object</code></pre><h2 id="获取户型数量分布信息"><a href="#获取户型数量分布信息" class="headerlink" title="获取户型数量分布信息"></a>获取户型数量分布信息</h2><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">housetype = house[<span class="string">'housetype'</span>].value_counts()</span><br><span class="line">housetype.head(<span class="number">8</span>).plot(kind=<span class="string">'bar'</span>,x=<span class="string">'housetype'</span>,y=<span class="string">'size'</span>, title=<span class="string">'户型数量分布'</span>)</span><br><span class="line">plt.legend([<span class="string">'数量'</span>]) </span><br><span class="line">plt.show()</span><br></pre></td></tr></table></figure>
+
+<p><img src="/images/9144104-4132b1de864912b2.png" alt="获取户型数量分布信息"></p>
+<h2 id="关注人数最多5套房子"><a href="#关注人数最多5套房子" class="headerlink" title="关注人数最多5套房子"></a>关注人数最多5套房子</h2><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">house[<span class="string">'guanzhu'</span>] = house[<span class="string">'followInfo'</span>].apply(data_adj,str = <span class="string">'人关注'</span>)</span><br><span class="line">house.sort_values(<span class="string">'guanzhu'</span>,ascending=<span class="literal">False</span>)[<span class="string">'title'</span>].head(<span class="number">5</span>)</span><br></pre></td></tr></table></figure>
+
+<pre><code>47                   弘善家园南向开间，满两年，免增值税
+2313         四惠东 康家园 南向一居室 地铁1号线出行房主自荐
+990     远见名苑  东南两居  满五年家庭唯一住房 诚心出售房主自荐
+2331               荣丰二期朝南复式无遮挡全天采光房主自荐
+915             通州万达北苑地铁站 天时名苑 大两居可改3居
+Name: title, dtype: object</code></pre><h2 id="户型和关注人数分布"><a href="#户型和关注人数分布" class="headerlink" title="户型和关注人数分布"></a>户型和关注人数分布</h2><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">fig, ax1 = plt.subplots(<span class="number">1</span>,<span class="number">1</span>)    </span><br><span class="line">type_interest_group = house[<span class="string">'guanzhu'</span>].groupby(house[<span class="string">'housetype'</span>]).agg([(<span class="string">'户型'</span>, <span class="string">'count'</span>), (<span class="string">'关注人数'</span>, <span class="string">'sum'</span>)])    </span><br><span class="line"><span class="comment">#取户型&gt;50的数据进行可视化</span></span><br><span class="line">ti_sort = type_interest_group[type_interest_group[<span class="string">'户型'</span>] &gt; <span class="number">50</span>].sort_values(by=<span class="string">'户型'</span>)    </span><br><span class="line">ti_sort.plot(kind=<span class="string">'barh'</span>, alpha=<span class="number">0.7</span>, grid=<span class="literal">True</span>, ax=ax1)    </span><br><span class="line">plt.title(<span class="string">'二手房户型和关注人数分布'</span>)    </span><br><span class="line">plt.ylabel(<span class="string">'户型'</span>) </span><br><span class="line">plt.show()</span><br></pre></td></tr></table></figure>
+
+<p><img src="/images/9144104-adfeaae925b049c8.png" alt="户型和关注人数分布"></p>
+<h2 id="面积分布"><a href="#面积分布" class="headerlink" title="面积分布"></a>面积分布</h2><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">fig,ax2 = plt.subplots(<span class="number">1</span>,<span class="number">1</span>)    </span><br><span class="line">area_level = [<span class="number">0</span>, <span class="number">50</span>, <span class="number">100</span>, <span class="number">150</span>, <span class="number">200</span>, <span class="number">250</span>, <span class="number">300</span>, <span class="number">500</span>]    </span><br><span class="line">label_level = [<span class="string">'小于50'</span>, <span class="string">'50-100'</span>, <span class="string">'100-150'</span>, <span class="string">'150-200'</span>, <span class="string">'200-250'</span>, <span class="string">'250-300'</span>, <span class="string">'300-350'</span>]    </span><br><span class="line">area_cut = pd.cut(house[<span class="string">'square'</span>], area_level, labels=label_level)        </span><br><span class="line">area_cut.value_counts().plot(kind=<span class="string">'bar'</span>, rot=<span class="number">30</span>, alpha=<span class="number">0.4</span>, grid=<span class="literal">True</span>, fontsize=<span class="string">'small'</span>, ax=ax2)    </span><br><span class="line">plt.title(<span class="string">'二手房面积分布'</span>)    </span><br><span class="line">plt.xlabel(<span class="string">'面积'</span>)    </span><br><span class="line">plt.legend([<span class="string">'数量'</span>])    </span><br><span class="line">plt.show()</span><br></pre></td></tr></table></figure>
+
+<p><img src="/images/9144104-3c7317acab94caa0.png" alt="面积分布"></p>
+<h2 id="聚类分析"><a href="#聚类分析" class="headerlink" title="聚类分析"></a>聚类分析</h2><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 缺失值处理:直接将缺失值去掉    </span></span><br><span class="line">cluster_data = house[[<span class="string">'guanzhu'</span>,<span class="string">'square'</span>,<span class="string">'totalPrice'</span>]].dropna()    </span><br><span class="line"><span class="comment">#将簇数设为3    </span></span><br><span class="line">K_model = KMeans(n_clusters=<span class="number">3</span>)    </span><br><span class="line">alg = K_model.fit(cluster_data)    </span><br><span class="line"><span class="string">'------聚类中心------'</span>   </span><br><span class="line">center = pd.DataFrame(alg.cluster_centers_, columns=[<span class="string">'关注人数'</span>,<span class="string">'面积'</span>,<span class="string">'房价'</span>])    </span><br><span class="line">cluster_data[<span class="string">'label'</span>] = alg.labels_ </span><br><span class="line">center</span><br></pre></td></tr></table></figure>
+
+<table>
+<thead>
+<tr>
+<th>id</th>
+<th>关注人数</th>
+<th>面积</th>
+<th>房价</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>0</td>
+<td>49.787599</td>
+<td>134.952934</td>
+<td>1138.906738</td>
+</tr>
+<tr>
+<td>1</td>
+<td>48.573579</td>
+<td>256.357676</td>
+<td>2549.974916</td>
+</tr>
+<tr>
+<td>2</td>
+<td>61.485727</td>
+<td>74.484049</td>
+<td>515.354447</td>
+</tr>
+</tbody></table>
+<h2 id="北京市在售面积最小二手房"><a href="#北京市在售面积最小二手房" class="headerlink" title="北京市在售面积最小二手房"></a>北京市在售面积最小二手房</h2><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">house.sort_values(<span class="string">'square'</span>).iloc[<span class="number">0</span>,:]</span><br></pre></td></tr></table></figure>
+
+<pre><code>houseID                                            101102324602
+title                                      智德北巷（北河沿大街）+小户型一居+南向
+link          https://bj.lianjia.com/ershoufang/101102324602...
+community                                                  智德北巷
+years                                          中楼层(共6层)1985年建板楼
+housetype                                                  1室0厅
+square                                                    15.29
+direction                                                     南
+floor                                          中楼层(共6层)1985年建板楼
+taxtype                                          距离5号线灯市口站1113米
+totalPrice                                                  220
+unitPrice                                                143885
+followInfo                               56人关注 / 共2次带看 / 8天以前发布
+validdate                                   2017-11-29 13:23:16
+guanzhu                                                      56
+Name: 15260, dtype: object</code></pre><h2 id="北京市在售面积最大二手房"><a href="#北京市在售面积最大二手房" class="headerlink" title="北京市在售面积最大二手房"></a>北京市在售面积最大二手房</h2><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">house.sort_values(<span class="string">'square'</span>,ascending=<span class="literal">False</span>).iloc[<span class="number">0</span>,:]</span><br></pre></td></tr></table></figure>
+
+<pre><code>houseID                                            101102105035
+title                                  中关村创业大街对过 有名的公司入驻其中正规写字楼
+link          https://bj.lianjia.com/ershoufang/101102105035...
+community                                                  银科大厦
+years                                         低楼层(共22层)2004年建塔楼
+housetype                                                 1房间0卫
+square                                                  2623.28
+direction                                               东 南 西 北
+floor                                         低楼层(共22层)2004年建塔楼
+taxtype                                     距离10号线苏州街站898米房本满五年
+totalPrice                                                12000
+unitPrice                                                 45745
+followInfo                               1人关注 / 共0次带看 / 2个月以前发布
+validdate                                   2017-11-29 14:07:32
+guanzhu                                                       1
+Name: 8571, dtype: object</code></pre><h2 id="各个行政区房源均价"><a href="#各个行政区房源均价" class="headerlink" title="各个行政区房源均价"></a>各个行政区房源均价</h2><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">house_unitprice_perdistrict = house_detail.groupby(<span class="string">'district'</span>).mean()[<span class="string">'unitPrice'</span>]</span><br><span class="line">house_unitprice_perdistrict.plot(kind=<span class="string">'bar'</span>,x=<span class="string">'district'</span>,y=<span class="string">'unitPrice'</span>, title=<span class="string">'各个行政区房源均价'</span>)</span><br><span class="line">plt.legend([<span class="string">'均价'</span>]) </span><br><span class="line">plt.show()</span><br></pre></td></tr></table></figure>
+
+<p><img src="/images/9144104-63b37e70c992f2e2.png" alt="各个行政区房源均价"></p>
+<h2 id="各个区域房源数量排序"><a href="#各个区域房源数量排序" class="headerlink" title="各个区域房源数量排序"></a>各个区域房源数量排序</h2><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">bizcircle_count=house_detail.groupby(<span class="string">'bizcircle'</span>).size().sort_values(ascending=<span class="literal">False</span>)</span><br><span class="line">bizcircle_count.head(<span class="number">20</span>).plot(kind=<span class="string">'bar'</span>,x=<span class="string">'bizcircle'</span>,y=<span class="string">'size'</span>, title=<span class="string">'各个区域房源数量分布'</span>)</span><br><span class="line">plt.legend([<span class="string">'数量'</span>]) </span><br><span class="line">plt.show()</span><br></pre></td></tr></table></figure>
+
+<p><img src="/images/9144104-bf6e4bb4f573c47b.png" alt="各个区域房源数量排序"></p>
+<h2 id="各个区域均价排序"><a href="#各个区域均价排序" class="headerlink" title="各个区域均价排序"></a>各个区域均价排序</h2><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">bizcircle_unitprice=house_detail.groupby(<span class="string">'bizcircle'</span>).mean()[<span class="string">'unitPrice'</span>].sort_values(ascending=<span class="literal">False</span>)</span><br><span class="line">bizcircle_unitprice.head(<span class="number">20</span>).plot(kind=<span class="string">'bar'</span>,x=<span class="string">'bizcircle'</span>,y=<span class="string">'unitPrice'</span>, title=<span class="string">'各个区域均价分布'</span>)</span><br><span class="line">plt.legend([<span class="string">'均价'</span>]) </span><br><span class="line">plt.show()</span><br></pre></td></tr></table></figure>
+
+<p><img src="/images/9144104-b7bb31b1bdd871d8.png" alt="各个区域均价排序"></p>
+<h2 id="各个区域小区数量"><a href="#各个区域小区数量" class="headerlink" title="各个区域小区数量"></a>各个区域小区数量</h2><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">bizcircle_community=community.groupby(<span class="string">'bizcircle'</span>)[<span class="string">'title'</span>].size().sort_values(ascending=<span class="literal">False</span>)</span><br><span class="line">bizcircle_community.head(<span class="number">20</span>).plot(kind=<span class="string">'bar'</span>, x=<span class="string">'bizcircle'</span>,y=<span class="string">'size'</span>, title=<span class="string">'各个区域小区数量分布'</span>)</span><br><span class="line">plt.legend([<span class="string">'数量'</span>]) </span><br><span class="line">plt.show()</span><br></pre></td></tr></table></figure>
+
+<p><img src="/images/9144104-4c5d9fb264c93624.png" alt="各个区域小区数量"></p>
+<h2 id="按小区均价排序"><a href="#按小区均价排序" class="headerlink" title="按小区均价排序"></a>按小区均价排序</h2><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">community_unitprice = house.groupby(<span class="string">'community'</span>).mean()[<span class="string">'unitPrice'</span>].sort_values(ascending=<span class="literal">False</span>)</span><br><span class="line">community_unitprice.head(<span class="number">15</span>).plot(kind=<span class="string">'bar'</span>,x=<span class="string">'community'</span>,y=<span class="string">'unitPrice'</span>, title=<span class="string">'各个小区均价分布'</span>)</span><br><span class="line">plt.legend([<span class="string">'均价'</span>]) </span><br><span class="line">plt.show()</span><br></pre></td></tr></table></figure>
+
+<p><img src="/images/9144104-684e09b1779ebc35.png" alt="小区均价排序"></p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://xuefenghuang.github.io/2019/09/04/2018-01-09-lianjia-data-analyse/" data-id="ck04v12ym00043syb9vtbhri1" class="article-share-link">Share</a>
+      
+      
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2019/09/04/2017-11-13-recommand-algorithm/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          广告CTR预测算法综述
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2019/09/04/2017-09-25-collaborate-filter/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">协同过滤算法概述</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+
+  
+    
+
+  
+    
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archives</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/09/">September 2019</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Recent Posts</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2019/09/04/2019-07-14-redis-study-record/">redis学习笔记</a>
+          </li>
+        
+          <li>
+            <a href="/2019/09/04/2019-09-04-design-patterns-study/">go语言设计模式学习笔记</a>
+          </li>
+        
+          <li>
+            <a href="/2019/09/04/2018-01-25-certbot/">使用certbot为网站免费上https</a>
+          </li>
+        
+          <li>
+            <a href="/2019/09/04/2019-07-14-kafka-study-record/">kafka学习笔记</a>
+          </li>
+        
+          <li>
+            <a href="/2019/09/04/2017-11-13-recommand-algorithm/">广告CTR预测算法综述</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      &copy; 2019 Xuefeng Huang<br>
+      Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+
+
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+<script src="/js/script.js"></script>
+
+
+
+  </div>
+</body>
+</html>

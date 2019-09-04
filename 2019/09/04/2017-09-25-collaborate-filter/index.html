@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html>
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="utf-8">
+  
+
+  
+  <title>协同过滤算法概述 | 博客</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="通常，协同过滤算法按照数据使用，可以分为：  基于用户（UserCF）—基于用户相似性  基于用户的协同过滤，通过不同用户对物品的评分来评测用户之间的相似性，基于用户之间的相似性做出推荐。简单来讲，就是给用户推荐和他兴趣相似的其他用户喜欢的物品。  上图示意出基于用户的协同过滤推荐机制的基本原理，假设用户 A 喜欢物品 A，物品 C，用户 B 喜欢物品 B，用户 C 喜欢物品 A ，物品 C 和物">
+<meta property="og:type" content="article">
+<meta property="og:title" content="协同过滤算法概述">
+<meta property="og:url" content="http://xuefenghuang.github.io/2019/09/04/2017-09-25-collaborate-filter/index.html">
+<meta property="og:site_name" content="博客">
+<meta property="og:description" content="通常，协同过滤算法按照数据使用，可以分为：  基于用户（UserCF）—基于用户相似性  基于用户的协同过滤，通过不同用户对物品的评分来评测用户之间的相似性，基于用户之间的相似性做出推荐。简单来讲，就是给用户推荐和他兴趣相似的其他用户喜欢的物品。  上图示意出基于用户的协同过滤推荐机制的基本原理，假设用户 A 喜欢物品 A，物品 C，用户 B 喜欢物品 B，用户 C 喜欢物品 A ，物品 C 和物">
+<meta property="og:locale" content="en">
+<meta property="og:image" content="http://xuefenghuang.github.io/images/usercf.jpeg">
+<meta property="og:image" content="http://xuefenghuang.github.io/images/itemcf.jpeg">
+<meta property="og:image" content="http://xuefenghuang.github.io/images/ALS.jpeg">
+<meta property="og:updated_time" content="2019-09-04T06:03:48.073Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="协同过滤算法概述">
+<meta name="twitter:description" content="通常，协同过滤算法按照数据使用，可以分为：  基于用户（UserCF）—基于用户相似性  基于用户的协同过滤，通过不同用户对物品的评分来评测用户之间的相似性，基于用户之间的相似性做出推荐。简单来讲，就是给用户推荐和他兴趣相似的其他用户喜欢的物品。  上图示意出基于用户的协同过滤推荐机制的基本原理，假设用户 A 喜欢物品 A，物品 C，用户 B 喜欢物品 B，用户 C 喜欢物品 A ，物品 C 和物">
+<meta name="twitter:image" content="http://xuefenghuang.github.io/images/usercf.jpeg">
+  
+    <link rel="alternate" href="/atom.xml" title="博客" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  
+    <link href="//fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
+  
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+</html>
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">博客</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="Search"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://xuefenghuang.github.io"></form>
+      </div>
+    </div>
+  </div>
+</header>
+      <div class="outer">
+        <section id="main"><article id="post-2017-09-25-collaborate-filter" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2019/09/04/2017-09-25-collaborate-filter/" class="article-date">
+  <time datetime="2019-09-04T06:03:48.073Z" itemprop="datePublished">2019-09-04</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      协同过滤算法概述
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>通常，协同过滤算法按照数据使用，可以分为：</p>
+<ul>
+<li>基于用户（UserCF）—基于用户相似性</li>
+</ul>
+<p>基于用户的协同过滤，通过不同用户对物品的评分来评测用户之间的相似性，基于用户之间的相似性做出推荐。简单来讲，就是给用户推荐和他兴趣相似的其他用户喜欢的物品。</p>
+<p><img src="/images/usercf.jpeg" alt="Image of UserCF"></p>
+<p>上图示意出基于用户的协同过滤推荐机制的基本原理，假设用户 A 喜欢物品 A，物品 C，用户 B 喜欢物品 B，用户 C 喜欢物品 A ，物品 C 和物品 D；从这些用户的历史喜好信息中，我们可以发现用户 A 和用户 C 的口味和偏好是比较类似的，同时用户 C 还喜欢物品 D，那么我们可以推断用户 A 可能也喜欢物品 D，因此可以将物品 D 推荐给用户 A。</p>
+<ul>
+<li>基于项目（ItemCF）—基于商品相似性</li>
+</ul>
+<p>基于项目的协同过滤，通过用户对不同item的评分来评测item之间的相似性，基于item之间的相似性做出推荐。简单来将，就是给用户推荐和他之前喜欢的物品相似的物品。</p>
+<p><img src="/images/itemcf.jpeg" alt="Image of ItemCF"></p>
+<p>上图示意出基于项目的协同过滤推荐机制的基本原理, 假设用户 A 喜欢物品 A 和物品 C，用户 B 喜欢物品 A，物品 B 和物品 C，用户 C 喜欢物品 A，从这些用户的历史喜好可以分析出物品 A 和物品 C 时比较类似的，喜欢物品 A 的人都喜欢物品 C，基于这个数据可以推断用户 C 很有可能也喜欢物品 C，所以系统会将物品 C 推荐给用户 C。</p>
+<ul>
+<li>基于模型（ModelCF）</li>
+</ul>
+<p>基于模型的协同过滤推荐就是基于样本的用户喜好信息，训练一个推荐模型，然后根据实时的用户喜好的信息进行预测，计算推荐。</p>
+<p>基于模型的方法不像基于邻域的方法，使用用户项评分直接预测新的项。基于模型的方法会在使用评分去学习预测模型的基础上，去预测新项。一般的想法是使用机器学习算法建立用户和项的相互作用模型，从而找出数据中的模式。在一般情况下，基于模型的CF被认为是建立CF推荐系统的更先进的算法。有许多不同的算法可用于构建模型并基于这些模型进行预测，例如，贝叶斯网络、聚类、分类、回归、矩阵分解、受限玻尔兹曼机等等。这些技术在为了最终赢得Netflix奖的解决方案中扮演了关键角色。Netflix发起了一个竞赛，从2006年到2009年提供一百万美元奖金，颁发给产生的推荐比他们自己的推荐系统精确10%以上的推荐系统团队。成功获奖的解决方案是Netflix研发的一个集成（即混合）了超过100种算法模型，这些算法模型都采用了矩阵分解和受限玻尔兹曼机</p>
+<p>Spark MLlib当前支持基于模型的协同过滤，其中用户和商品通过一小组隐性因子进行表达，并且这些因子也用于预测缺失的元素。MLlib使用交替最小二乘法（ALS）来学习这些隐性因子。</p>
+<p>这种ALS算法不像基于用户或者基于物品的协同过滤算法一样，通过计算相似度来进行评分预测和推荐，而是通过矩阵分解的方法来进行预测用户对电影的评分。即如下图所示。</p>
+<p><img src="/images/ALS.jpeg" alt="Image of ItemCF"></p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://xuefenghuang.github.io/2019/09/04/2017-09-25-collaborate-filter/" data-id="ck04v12yk00023sybvgov81sl" class="article-share-link">Share</a>
+      
+      
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2019/09/04/2018-01-09-lianjia-data-analyse/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          利用Python对链家网北京主城区二手房进行数据分析
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2019/09/04/2017-09-25-book_recommender_system/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">基于Spark的在线智能图书推荐系统</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+
+  
+    
+
+  
+    
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archives</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/09/">September 2019</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Recent Posts</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2019/09/04/2019-07-14-redis-study-record/">redis学习笔记</a>
+          </li>
+        
+          <li>
+            <a href="/2019/09/04/2019-09-04-design-patterns-study/">go语言设计模式学习笔记</a>
+          </li>
+        
+          <li>
+            <a href="/2019/09/04/2018-01-25-certbot/">使用certbot为网站免费上https</a>
+          </li>
+        
+          <li>
+            <a href="/2019/09/04/2019-07-14-kafka-study-record/">kafka学习笔记</a>
+          </li>
+        
+          <li>
+            <a href="/2019/09/04/2017-11-13-recommand-algorithm/">广告CTR预测算法综述</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      &copy; 2019 Xuefeng Huang<br>
+      Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+
+
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+<script src="/js/script.js"></script>
+
+
+
+  </div>
+</body>
+</html>

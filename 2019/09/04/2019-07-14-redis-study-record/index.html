@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html>
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="utf-8">
+  
+
+  
+  <title>redis学习笔记 | 博客</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="数据类型：(1) 字符串（支持整型、浮点数等） (2) 列表 (3) 集合 (4) 散列 (5) 有序集合 快照（一个时间的副本）、AOF（记录命令）应用：（1）最新日志 lpush 列表 （2）常见日志 有序集合 （3）计数器 有序集合 （4）IP zrevrangebyscore ip_to_score算法 （5）自动补全 list （6）通讯录自动补全 有序集合，score=0, membe">
+<meta property="og:type" content="article">
+<meta property="og:title" content="redis学习笔记">
+<meta property="og:url" content="http://xuefenghuang.github.io/2019/09/04/2019-07-14-redis-study-record/index.html">
+<meta property="og:site_name" content="博客">
+<meta property="og:description" content="数据类型：(1) 字符串（支持整型、浮点数等） (2) 列表 (3) 集合 (4) 散列 (5) 有序集合 快照（一个时间的副本）、AOF（记录命令）应用：（1）最新日志 lpush 列表 （2）常见日志 有序集合 （3）计数器 有序集合 （4）IP zrevrangebyscore ip_to_score算法 （5）自动补全 list （6）通讯录自动补全 有序集合，score=0, membe">
+<meta property="og:locale" content="en">
+<meta property="og:updated_time" content="2019-09-04T06:03:48.076Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="redis学习笔记">
+<meta name="twitter:description" content="数据类型：(1) 字符串（支持整型、浮点数等） (2) 列表 (3) 集合 (4) 散列 (5) 有序集合 快照（一个时间的副本）、AOF（记录命令）应用：（1）最新日志 lpush 列表 （2）常见日志 有序集合 （3）计数器 有序集合 （4）IP zrevrangebyscore ip_to_score算法 （5）自动补全 list （6）通讯录自动补全 有序集合，score=0, membe">
+  
+    <link rel="alternate" href="/atom.xml" title="博客" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  
+    <link href="//fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
+  
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+</html>
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">博客</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="Search"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://xuefenghuang.github.io"></form>
+      </div>
+    </div>
+  </div>
+</header>
+      <div class="outer">
+        <section id="main"><article id="post-2019-07-14-redis-study-record" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2019/09/04/2019-07-14-redis-study-record/" class="article-date">
+  <time datetime="2019-09-04T06:03:48.076Z" itemprop="datePublished">2019-09-04</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      redis学习笔记
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h3 id="数据类型："><a href="#数据类型：" class="headerlink" title="数据类型："></a>数据类型：</h3><p>(1) 字符串（支持整型、浮点数等）</p>
+<p>(2) 列表</p>
+<p>(3) 集合</p>
+<p>(4) 散列</p>
+<p>(5) 有序集合</p>
+<h3 id="快照（一个时间的副本）、AOF（记录命令）"><a href="#快照（一个时间的副本）、AOF（记录命令）" class="headerlink" title="快照（一个时间的副本）、AOF（记录命令）"></a>快照（一个时间的副本）、AOF（记录命令）</h3><h3 id="应用："><a href="#应用：" class="headerlink" title="应用："></a>应用：</h3><p>（1）最新日志 lpush 列表</p>
+<p>（2）常见日志 有序集合</p>
+<p>（3）计数器 有序集合</p>
+<p>（4）IP zrevrangebyscore ip_to_score算法</p>
+<p>（5）自动补全 list</p>
+<p>（6）通讯录自动补全 有序集合，score=0, member根据a-z排序</p>
+<p>（7）分布式锁 setnx</p>
+<p>（8）计数信号量 有序集合</p>
+<p>（9）消息拉取 群组、用户、zset</p>
+<h3 id="redis一致性问题"><a href="#redis一致性问题" class="headerlink" title="redis一致性问题"></a>redis一致性问题</h3><p>Redis 并不能保证数据的强一致性. 这意味这在实际中集群在特定的条件下可能会丢失写操作：第一个原因是因为集群是用了异步复制. 写操作过程:</p>
+<p>（1）客户端向主节点B写入一条命令.</p>
+<p>（2）主节点B向客户端回复命令状态.</p>
+<p>（3）主节点将写操作复制给他得从节点 B1, B2 和 B3</p>
+<h3 id="数据分片"><a href="#数据分片" class="headerlink" title="数据分片"></a>数据分片</h3><p>Redis 集群使用数据分片（sharding）而非一致性哈希（consistency hashing）来实现： 一个 Redis 集群包含 16384 个哈希槽（hash slot）， 数据库中的每个键都属于这 16384 个哈希槽的其中一个， 集群使用公式 CRC16(key) % 16384 来计算键 key 属于哪个槽， 其中 CRC16(key) 语句用于计算键 key 的 CRC16 校验和 。</p>
+<p>如果用户将新节点 D 添加到集群中， 那么集群只需要将节点 A 、B 、 C 中的某些槽移动到节点 D 就可以了。<br>如果用户要从集群中移除节点 A ， 那么集群只需要将节点 A 中的所有哈希槽移动到节点 B 和节点 C ， 然后再移除空白（不包含任何哈希槽）的节点 A 就可以了。</p>
+<h3 id="主从复制"><a href="#主从复制" class="headerlink" title="主从复制"></a>主从复制</h3><p>为了使得集群在一部分节点下线或者无法与集群的大多数（majority）节点进行通讯的情况下， 仍然可以正常运作， Redis 集群对节点使用了主从复制功能： 集群中的每个节点都有 1 个至 N 个复制品（replica）， 其中一个复制品为主节点（master）， 而其余的 N-1 个复制品为从节点（slave）</p>
+<h3 id="选主"><a href="#选主" class="headerlink" title="选主"></a>选主</h3><p>当有n个节点标记master为主观下线时，master被标记为客观下线，这个时候sentinel集群会发起一次领头选举，raft协议，由选出的领头进行故障转移，把一个复制偏移量最大的从节点提升为master，然后通过发布订阅的形式通知客户端切换ip。</p>
+<h3 id="缓存穿透"><a href="#缓存穿透" class="headerlink" title="缓存穿透"></a>缓存穿透</h3><p>是指查询一个一定不存在的数据，由于缓存是不命中时需要从数据库查询，查不到数据则不写入缓存，这将导致这个不存在的数据每次请求都要到数据库去查询，造成缓存穿透。<br>解决办法是缓存空对象. 将 null 变成一个值.</p>
+<p>如果缓存集中在一段时间内失效，发生大量的缓存穿透，所有的查询都落在数据库上，造成了缓存雪崩。解决办法是加锁排队。</p>
+<h3 id="redis主从同步"><a href="#redis主从同步" class="headerlink" title="redis主从同步"></a>redis主从同步</h3><p>分为sync, psync(部分重同步)。根据复制offset和复制积压缓冲区、服务器运行ID判断是部分复制还是完整复制。优点是提高复制效率，不用每次都全部复制。以前的不能高效地处理断线后重复制的情况。</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://xuefenghuang.github.io/2019/09/04/2019-07-14-redis-study-record/" data-id="ck04v12z400073sybclmk15gw" class="article-share-link">Share</a>
+      
+      
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+  
+    <a href="/2019/09/04/2019-09-04-design-patterns-study/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">go语言设计模式学习笔记</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+
+  
+    
+
+  
+    
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archives</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/09/">September 2019</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Recent Posts</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2019/09/04/2019-07-14-redis-study-record/">redis学习笔记</a>
+          </li>
+        
+          <li>
+            <a href="/2019/09/04/2019-09-04-design-patterns-study/">go语言设计模式学习笔记</a>
+          </li>
+        
+          <li>
+            <a href="/2019/09/04/2018-01-25-certbot/">使用certbot为网站免费上https</a>
+          </li>
+        
+          <li>
+            <a href="/2019/09/04/2019-07-14-kafka-study-record/">kafka学习笔记</a>
+          </li>
+        
+          <li>
+            <a href="/2019/09/04/2017-11-13-recommand-algorithm/">广告CTR预测算法综述</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      &copy; 2019 Xuefeng Huang<br>
+      Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+
+
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+<script src="/js/script.js"></script>
+
+
+
+  </div>
+</body>
+</html>

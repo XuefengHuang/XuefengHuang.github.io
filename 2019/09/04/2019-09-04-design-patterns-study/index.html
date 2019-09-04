@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html>
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="utf-8">
+  
+
+  
+  <title>go语言设计模式学习笔记 | 博客</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="目录 单例模式 简单工厂模式 工厂方法模式 抽象工厂模式 策略模式 观察者模式 装饰者模式  单例模式  单例模式确保程序中一个类最多只有一个实例 单例模式也提供访问这个实例的全局点 有一些对象其实我们只需要一个，比方说：线程池，缓存，对话框，处理偏好设置和注册表对象，日志对象等。事实上，这类对象只能有一个实例，如果制造出多个实例，就会导致许多问题产生，例如：程序的行为异常、资源使用过量，或者是不">
+<meta property="og:type" content="article">
+<meta property="og:title" content="go语言设计模式学习笔记">
+<meta property="og:url" content="http://xuefenghuang.github.io/2019/09/04/2019-09-04-design-patterns-study/index.html">
+<meta property="og:site_name" content="博客">
+<meta property="og:description" content="目录 单例模式 简单工厂模式 工厂方法模式 抽象工厂模式 策略模式 观察者模式 装饰者模式  单例模式  单例模式确保程序中一个类最多只有一个实例 单例模式也提供访问这个实例的全局点 有一些对象其实我们只需要一个，比方说：线程池，缓存，对话框，处理偏好设置和注册表对象，日志对象等。事实上，这类对象只能有一个实例，如果制造出多个实例，就会导致许多问题产生，例如：程序的行为异常、资源使用过量，或者是不">
+<meta property="og:locale" content="en">
+<meta property="og:updated_time" content="2019-09-04T06:03:48.077Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="go语言设计模式学习笔记">
+<meta name="twitter:description" content="目录 单例模式 简单工厂模式 工厂方法模式 抽象工厂模式 策略模式 观察者模式 装饰者模式  单例模式  单例模式确保程序中一个类最多只有一个实例 单例模式也提供访问这个实例的全局点 有一些对象其实我们只需要一个，比方说：线程池，缓存，对话框，处理偏好设置和注册表对象，日志对象等。事实上，这类对象只能有一个实例，如果制造出多个实例，就会导致许多问题产生，例如：程序的行为异常、资源使用过量，或者是不">
+  
+    <link rel="alternate" href="/atom.xml" title="博客" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  
+    <link href="//fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
+  
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+</html>
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">博客</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="Search"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://xuefenghuang.github.io"></form>
+      </div>
+    </div>
+  </div>
+</header>
+      <div class="outer">
+        <section id="main"><article id="post-2019-09-04-design-patterns-study" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2019/09/04/2019-09-04-design-patterns-study/" class="article-date">
+  <time datetime="2019-09-04T06:03:48.076Z" itemprop="datePublished">2019-09-04</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      go语言设计模式学习笔记
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h1 id="目录"><a href="#目录" class="headerlink" title="目录"></a>目录</h1><ol>
+<li><a href="#单例模式">单例模式</a></li>
+<li><a href="#简单工厂模式">简单工厂模式</a></li>
+<li><a href="#工厂方法模式">工厂方法模式</a></li>
+<li><a href="#抽象工厂模式">抽象工厂模式</a></li>
+<li><a href="#策略模式">策略模式</a></li>
+<li><a href="#观察者模式">观察者模式</a></li>
+<li><a href="#装饰者模式">装饰者模式</a></li>
+</ol>
+<h3 id="单例模式"><a href="#单例模式" class="headerlink" title="单例模式 "></a>单例模式 <a name="单例模式"></a></h3><ul>
+<li>单例模式确保程序中一个类最多只有一个实例</li>
+<li>单例模式也提供访问这个实例的全局点</li>
+<li>有一些对象其实我们只需要一个，比方说：线程池，缓存，对话框，处理偏好设置和注册表对象，日志对象等。事实上，这类对象只能有一个实例，如果制造出多个实例，就会导致许多问题产生，例如：程序的行为异常、资源使用过量，或者是不一致的结果。</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">import &quot;sync&quot;</span><br><span class="line"></span><br><span class="line">//Singleton 是单例模式类</span><br><span class="line">type Singleton struct&#123;&#125;</span><br><span class="line"></span><br><span class="line">var singleton *Singleton</span><br><span class="line">var once sync.Once</span><br><span class="line"></span><br><span class="line">//GetInstance 用于获取单例模式对象</span><br><span class="line">func GetInstance() *Singleton &#123;</span><br><span class="line">	once.Do(func() &#123;</span><br><span class="line">		singleton = &amp;Singleton&#123;&#125;</span><br><span class="line">	&#125;)</span><br><span class="line"></span><br><span class="line">	return singleton</span><br></pre></td></tr></table></figure>
+
+<h3 id="简单工厂模式"><a href="#简单工厂模式" class="headerlink" title="简单工厂模式 "></a>简单工厂模式 <a name="简单工厂模式"></a></h3><ul>
+<li>go 语言没有构造函数一说，所以一般会定义NewXXX函数来初始化相关类。 NewXXX 函数返回接口时就是简单工厂模式，也就是说Golang的一般推荐做法就是简单工厂。</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line">import &quot;fmt&quot;</span><br><span class="line"></span><br><span class="line">//API is interface</span><br><span class="line">type API interface &#123;</span><br><span class="line">	Say(name string) string</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">//NewAPI return Api instance by type</span><br><span class="line">func NewAPI(t int) API &#123;</span><br><span class="line">	if t == 1 &#123;</span><br><span class="line">		return &amp;hiAPI&#123;&#125;</span><br><span class="line">	&#125; else if t == 2 &#123;</span><br><span class="line">		return &amp;helloAPI&#123;&#125;</span><br><span class="line">	&#125;</span><br><span class="line">	return nil</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">//hiAPI is one of API implement</span><br><span class="line">type hiAPI struct&#123;&#125;</span><br><span class="line"></span><br><span class="line">//Say hi to name</span><br><span class="line">func (*hiAPI) Say(name string) string &#123;</span><br><span class="line">	return fmt.Sprintf(&quot;Hi, %s&quot;, name)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">//HelloAPI is another API implement</span><br><span class="line">type helloAPI struct&#123;&#125;</span><br><span class="line"></span><br><span class="line">//Say hello to name</span><br><span class="line">func (*helloAPI) Say(name string) string &#123;</span><br><span class="line">	return fmt.Sprintf(&quot;Hello, %s&quot;, name)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="工厂方法模式"><a href="#工厂方法模式" class="headerlink" title="工厂方法模式 "></a>工厂方法模式 <a name="工厂方法模式"></a></h3><ul>
+<li>定义了一个创建对象的接口，但由子类决定要实例化的类是哪一个。工厂方法让类把实例化推迟到子类。</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br></pre></td><td class="code"><pre><span class="line">//Operator 是被封装的实际类接口</span><br><span class="line">type Operator interface &#123;</span><br><span class="line">	SetA(int)</span><br><span class="line">	SetB(int)</span><br><span class="line">	Result() int</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">//OperatorFactory 是工厂接口</span><br><span class="line">type OperatorFactory interface &#123;</span><br><span class="line">	Create() Operator</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">//OperatorBase 是Operator 接口实现的基类，封装公用方法</span><br><span class="line">type OperatorBase struct &#123;</span><br><span class="line">	a, b int</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">//SetA 设置 A</span><br><span class="line">func (o *OperatorBase) SetA(a int) &#123;</span><br><span class="line">	o.a = a</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">//SetB 设置 B</span><br><span class="line">func (o *OperatorBase) SetB(b int) &#123;</span><br><span class="line">	o.b = b</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">//PlusOperatorFactory 是 PlusOperator 的工厂类</span><br><span class="line">type PlusOperatorFactory struct&#123;&#125;</span><br><span class="line"></span><br><span class="line">func (PlusOperatorFactory) Create() Operator &#123;</span><br><span class="line">	return &amp;PlusOperator&#123;</span><br><span class="line">		OperatorBase: &amp;OperatorBase&#123;&#125;,</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">//PlusOperator Operator 的实际加法实现</span><br><span class="line">type PlusOperator struct &#123;</span><br><span class="line">	*OperatorBase</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">//Result 获取结果</span><br><span class="line">func (o PlusOperator) Result() int &#123;</span><br><span class="line">	return o.a + o.b</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">//MinusOperatorFactory 是 MinusOperator 的工厂类</span><br><span class="line">type MinusOperatorFactory struct&#123;&#125;</span><br><span class="line"></span><br><span class="line">func (MinusOperatorFactory) Create() Operator &#123;</span><br><span class="line">	return &amp;MinusOperator&#123;</span><br><span class="line">		OperatorBase: &amp;OperatorBase&#123;&#125;,</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">//MinusOperator Operator 的实际减法实现</span><br><span class="line">type MinusOperator struct &#123;</span><br><span class="line">	*OperatorBase</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">//Result 获取结果</span><br><span class="line">func (o MinusOperator) Result() int &#123;</span><br><span class="line">	return o.a - o.b</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="抽象工厂模式"><a href="#抽象工厂模式" class="headerlink" title="抽象工厂模式 "></a>抽象工厂模式 <a name="抽象工厂模式"></a></h3><ul>
+<li>提供一个接口，用于创建相关或依赖对象的家族，而不需要明确指定具体类</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br></pre></td><td class="code"><pre><span class="line">import &quot;fmt&quot;</span><br><span class="line"></span><br><span class="line">//OrderMainDAO 为订单主记录</span><br><span class="line">type OrderMainDAO interface &#123;</span><br><span class="line">	SaveOrderMain()</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">//OrderDetailDAO 为订单详情纪录</span><br><span class="line">type OrderDetailDAO interface &#123;</span><br><span class="line">	SaveOrderDetail()</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">//DAOFactory DAO 抽象模式工厂接口</span><br><span class="line">type DAOFactory interface &#123;</span><br><span class="line">	CreateOrderMainDAO() OrderMainDAO</span><br><span class="line">	CreateOrderDetailDAO() OrderDetailDAO</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">//RDBMainDAP 为关系型数据库的OrderMainDAO实现</span><br><span class="line">type RDBMainDAO struct&#123;&#125;</span><br><span class="line"></span><br><span class="line">//SaveOrderMain ...</span><br><span class="line">func (*RDBMainDAO) SaveOrderMain() &#123;</span><br><span class="line">	fmt.Print(&quot;rdb main save\n&quot;)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">//RDBDetailDAO 为关系型数据库的OrderDetailDAO实现</span><br><span class="line">type RDBDetailDAO struct&#123;&#125;</span><br><span class="line"></span><br><span class="line">// SaveOrderDetail ...</span><br><span class="line">func (*RDBDetailDAO) SaveOrderDetail() &#123;</span><br><span class="line">	fmt.Print(&quot;rdb detail save\n&quot;)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">//RDBDAOFactory 是RDB 抽象工厂实现</span><br><span class="line">type RDBDAOFactory struct&#123;&#125;</span><br><span class="line"></span><br><span class="line">func (*RDBDAOFactory) CreateOrderMainDAO() OrderMainDAO &#123;</span><br><span class="line">	return &amp;RDBMainDAO&#123;&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">func (*RDBDAOFactory) CreateOrderDetailDAO() OrderDetailDAO &#123;</span><br><span class="line">	return &amp;RDBDetailDAO&#123;&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">//XMLMainDAO XML存储</span><br><span class="line">type XMLMainDAO struct&#123;&#125;</span><br><span class="line"></span><br><span class="line">//SaveOrderMain ...</span><br><span class="line">func (*XMLMainDAO) SaveOrderMain() &#123;</span><br><span class="line">	fmt.Print(&quot;xml main save\n&quot;)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">//XMLDetailDAO XML存储</span><br><span class="line">type XMLDetailDAO struct&#123;&#125;</span><br><span class="line"></span><br><span class="line">// SaveOrderDetail ...</span><br><span class="line">func (*XMLDetailDAO) SaveOrderDetail() &#123;</span><br><span class="line">	fmt.Print(&quot;xml detail save&quot;)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">//XMLDAOFactory 是RDB 抽象工厂实现</span><br><span class="line">type XMLDAOFactory struct&#123;&#125;</span><br><span class="line"></span><br><span class="line">func (*XMLDAOFactory) CreateOrderMainDAO() OrderMainDAO &#123;</span><br><span class="line">	return &amp;XMLMainDAO&#123;&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">func (*XMLDAOFactory) CreateOrderDetailDAO() OrderDetailDAO &#123;</span><br><span class="line">	return &amp;XMLDetailDAO&#123;&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="策略模式"><a href="#策略模式" class="headerlink" title="策略模式 "></a>策略模式 <a name="策略模式"></a></h3><ul>
+<li>针对接口编程，而不是针对实现编程</li>
+<li>定义了算法族，分别封装起来，让他们之间可以互相替换，此模式让算法变化独立于使用算法的客户</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line">import &quot;fmt&quot;</span><br><span class="line"></span><br><span class="line">type PaymentContext struct &#123;</span><br><span class="line">	Name, CardID string</span><br><span class="line">	Money        int</span><br><span class="line">	payment      PaymentStrategy</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">func NewPaymentContext(name, cardid string, money int, payment PaymentStrategy) *PaymentContext &#123;</span><br><span class="line">	return &amp;PaymentContext&#123;</span><br><span class="line">		Name:    name,</span><br><span class="line">		CardID:  cardid,</span><br><span class="line">		Money:   money,</span><br><span class="line">		payment: payment,</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">func (p *PaymentContext) Pay() &#123;</span><br><span class="line">	p.payment.Pay(p)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">type PaymentStrategy interface &#123;</span><br><span class="line">	Pay(*PaymentContext)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">type Cash struct&#123;&#125;</span><br><span class="line"></span><br><span class="line">func (*Cash) Pay(ctx *PaymentContext) &#123;</span><br><span class="line">	fmt.Printf(&quot;Pay $%d to %s by cash&quot;, ctx.Money, ctx.Name)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">type Bank struct&#123;&#125;</span><br><span class="line"></span><br><span class="line">func (*Bank) Pay(ctx *PaymentContext) &#123;</span><br><span class="line">	fmt.Printf(&quot;Pay $%d to %s by bank account %s&quot;, ctx.Money, ctx.Name, ctx.CardID)</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="观察者模式"><a href="#观察者模式" class="headerlink" title="观察者模式 "></a>观察者模式 <a name="观察者模式"></a></h3><ul>
+<li>定义了对象之间的一对多依赖，这样一来，当一个对象改变状态时，它的所有依赖者都会收到通知并自动更新。</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br></pre></td><td class="code"><pre><span class="line">import &quot;fmt&quot;</span><br><span class="line"></span><br><span class="line">type Subject struct &#123;</span><br><span class="line">	observers []Observer</span><br><span class="line">	context   string</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">func NewSubject() *Subject &#123;</span><br><span class="line">	return &amp;Subject&#123;</span><br><span class="line">		observers: make([]Observer, 0),</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">func (s *Subject) Attach(o Observer) &#123;</span><br><span class="line">	s.observers = append(s.observers, o)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">func (s *Subject) notify() &#123;</span><br><span class="line">	for _, o := range s.observers &#123;</span><br><span class="line">		o.Update(s)</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">func (s *Subject) UpdateContext(context string) &#123;</span><br><span class="line">	s.context = context</span><br><span class="line">	s.notify()</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">type Observer interface &#123;</span><br><span class="line">	Update(*Subject)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">type Reader struct &#123;</span><br><span class="line">	name string</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">func NewReader(name string) *Reader &#123;</span><br><span class="line">	return &amp;Reader&#123;</span><br><span class="line">		name: name,</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">func (r *Reader) Update(s *Subject) &#123;</span><br><span class="line">	fmt.Printf(&quot;%s receive %s\n&quot;, r.name, s.context)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="装饰者模式"><a href="#装饰者模式" class="headerlink" title="装饰者模式 "></a>装饰者模式 <a name="装饰者模式"></a></h3><ul>
+<li>动态地将责任附加到对象上。若要扩展功能，装饰者提供了比继承更具弹性的替代方案。</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br></pre></td><td class="code"><pre><span class="line">type Component interface &#123;</span><br><span class="line">	Calc() int</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">type ConcreteComponent struct&#123;&#125;</span><br><span class="line"></span><br><span class="line">func (*ConcreteComponent) Calc() int &#123;</span><br><span class="line">	return 0</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">type MulDecorator struct &#123;</span><br><span class="line">	Component</span><br><span class="line">	num int</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">func WarpMulDecorator(c Component, num int) Component &#123;</span><br><span class="line">	return &amp;MulDecorator&#123;</span><br><span class="line">		Component: c,</span><br><span class="line">		num:       num,</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">func (d *MulDecorator) Calc() int &#123;</span><br><span class="line">	return d.Component.Calc() * d.num</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">type AddDecorator struct &#123;</span><br><span class="line">	Component</span><br><span class="line">	num int</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">func WarpAddDecorator(c Component, num int) Component &#123;</span><br><span class="line">	return &amp;AddDecorator&#123;</span><br><span class="line">		Component: c,</span><br><span class="line">		num:       num,</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">func (d *AddDecorator) Calc() int &#123;</span><br><span class="line">	return d.Component.Calc() + d.num</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://xuefenghuang.github.io/2019/09/04/2019-09-04-design-patterns-study/" data-id="ck04v12z500083syb05q9afj2" class="article-share-link">Share</a>
+      
+      
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2019/09/04/2019-07-14-redis-study-record/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          redis学习笔记
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2019/09/04/2018-01-25-certbot/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">使用certbot为网站免费上https</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+
+  
+    
+
+  
+    
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archives</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/09/">September 2019</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Recent Posts</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2019/09/04/2019-07-14-redis-study-record/">redis学习笔记</a>
+          </li>
+        
+          <li>
+            <a href="/2019/09/04/2019-09-04-design-patterns-study/">go语言设计模式学习笔记</a>
+          </li>
+        
+          <li>
+            <a href="/2019/09/04/2018-01-25-certbot/">使用certbot为网站免费上https</a>
+          </li>
+        
+          <li>
+            <a href="/2019/09/04/2019-07-14-kafka-study-record/">kafka学习笔记</a>
+          </li>
+        
+          <li>
+            <a href="/2019/09/04/2017-11-13-recommand-algorithm/">广告CTR预测算法综述</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      &copy; 2019 Xuefeng Huang<br>
+      Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+
+
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+<script src="/js/script.js"></script>
+
+
+
+  </div>
+</body>
+</html>

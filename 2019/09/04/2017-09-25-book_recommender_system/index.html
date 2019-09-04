@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html>
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="utf-8">
+  
+
+  
+  <title>基于Spark的在线智能图书推荐系统 | 博客</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="项目简介 基于Spark, Python Flask, 和 Book-Crossing Dataset 的在线图书推荐系统。 源代码地址：https://github.com/XuefengHuang/spark-book-recommender-system。  适合初学者学习如何搭建一个推荐系统，本文底下附有其他数据，可供参考学习。  基于模型的协同过滤应用—图书推荐本文实现对用户推荐图书的简">
+<meta property="og:type" content="article">
+<meta property="og:title" content="基于Spark的在线智能图书推荐系统">
+<meta property="og:url" content="http://xuefenghuang.github.io/2019/09/04/2017-09-25-book_recommender_system/index.html">
+<meta property="og:site_name" content="博客">
+<meta property="og:description" content="项目简介 基于Spark, Python Flask, 和 Book-Crossing Dataset 的在线图书推荐系统。 源代码地址：https://github.com/XuefengHuang/spark-book-recommender-system。  适合初学者学习如何搭建一个推荐系统，本文底下附有其他数据，可供参考学习。  基于模型的协同过滤应用—图书推荐本文实现对用户推荐图书的简">
+<meta property="og:locale" content="en">
+<meta property="og:image" content="http://xuefenghuang.github.io/images/example1.png">
+<meta property="og:image" content="http://xuefenghuang.github.io/images/example2.png">
+<meta property="og:updated_time" content="2019-09-04T06:03:48.072Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="基于Spark的在线智能图书推荐系统">
+<meta name="twitter:description" content="项目简介 基于Spark, Python Flask, 和 Book-Crossing Dataset 的在线图书推荐系统。 源代码地址：https://github.com/XuefengHuang/spark-book-recommender-system。  适合初学者学习如何搭建一个推荐系统，本文底下附有其他数据，可供参考学习。  基于模型的协同过滤应用—图书推荐本文实现对用户推荐图书的简">
+<meta name="twitter:image" content="http://xuefenghuang.github.io/images/example1.png">
+  
+    <link rel="alternate" href="/atom.xml" title="博客" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  
+    <link href="//fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
+  
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+</html>
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">博客</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="Search"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://xuefenghuang.github.io"></form>
+      </div>
+    </div>
+  </div>
+</header>
+      <div class="outer">
+        <section id="main"><article id="post-2017-09-25-book_recommender_system" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2019/09/04/2017-09-25-book_recommender_system/" class="article-date">
+  <time datetime="2019-09-04T06:03:48.072Z" itemprop="datePublished">2019-09-04</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      基于Spark的在线智能图书推荐系统
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h2 id="项目简介"><a href="#项目简介" class="headerlink" title="项目简介"></a>项目简介</h2><ul>
+<li>基于Spark, Python Flask, 和 <a href="http://www2.informatik.uni-freiburg.de/~cziegler/BX/" target="_blank" rel="noopener">Book-Crossing Dataset</a> 的在线图书推荐系统。</li>
+<li>源代码地址：<a href="https://github.com/XuefengHuang/spark-book-recommender-system。" target="_blank" rel="noopener">https://github.com/XuefengHuang/spark-book-recommender-system。</a> </li>
+<li>适合初学者学习如何搭建一个推荐系统，本文底下附有其他数据，可供参考学习。</li>
+</ul>
+<h2 id="基于模型的协同过滤应用—图书推荐"><a href="#基于模型的协同过滤应用—图书推荐" class="headerlink" title="基于模型的协同过滤应用—图书推荐"></a>基于模型的<a href="https://xuefenghuang.github.io/collaborate-filter/">协同过滤</a>应用—图书推荐</h2><p>本文实现对用户推荐图书的简单应用。</p>
+<ul>
+<li>推荐算法：</li>
+</ul>
+<p>在我们的在线图书推荐系统中，我们借用Spark的ALS算法的训练和预测函数，每次收到新的数据后，将其更新到训练数据集中，然后更新ALS训练得到的模型。</p>
+<p>假设我们有一组用户，他们表现出了对一组图书的喜好。用户对一本图书的喜好程度越高，就会给其更高的评分，范围是从1到5。我们来通过一个矩阵来展示它，行代表用户，列代表图书。用户对图书的评分。所有的评分范围从1到5，5代表喜欢程度最高。第一个用户（行1）对第一个图书（列1）的评分是4。空的单元格代表用户未给图书评价。</p>
+<p><img src="/images/example1.png" alt="Image of Example1"></p>
+<p>矩阵因子分解（如奇异值分解，奇异值分解+ +）将项和用户都转化成了相同的潜在空间，它所代表了用户和项之间的潜相互作用。矩阵分解背后的原理是潜在特征代表了用户如何给项进行评分。给定用户和项的潜在描述，我们可以预测用户将会给还未评价的项多少评分。</p>
+<p><img src="/images/example2.png" alt="Image of Example1"></p>
+<ul>
+<li>数据描述：</li>
+</ul>
+<p>评分数据文件:</p>
+<p><code>&quot;User-ID&quot;;&quot;ISBN&quot;;&quot;Book-Rating&quot;</code></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">&quot;276725&quot;;&quot;034545104X&quot;;&quot;0&quot;</span><br><span class="line">&quot;276726&quot;;&quot;0155061224&quot;;&quot;5&quot;</span><br><span class="line">&quot;276727&quot;;&quot;0446520802&quot;;&quot;0&quot;</span><br><span class="line">&quot;276729&quot;;&quot;052165615X&quot;;&quot;3&quot;</span><br><span class="line">&quot;276729&quot;;&quot;0521795028&quot;;&quot;6&quot;</span><br><span class="line">&quot;276733&quot;;&quot;2080674722&quot;;&quot;0&quot;</span><br><span class="line">&quot;276736&quot;;&quot;3257224281&quot;;&quot;8&quot;</span><br></pre></td></tr></table></figure>
+
+<p>图书数据文件:</p>
+<p><code>&quot;ISBN&quot;;&quot;Book-Title&quot;;&quot;Book-Author&quot;;&quot;Year-Of-Publication&quot;;&quot;Publisher&quot;;&quot;Image-URL-S&quot;;&quot;Image-URL-M&quot;;&quot;Image-URL-L&quot;</code></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">&quot;0195153448&quot;;&quot;Classical Mythology&quot;;&quot;Mark P. O. Morford&quot;;&quot;2002&quot;;&quot;Oxford University Press&quot;;&quot;http://images.amazon.com/images/P/0195153448.01.THUMBZZZ.jpg&quot;;&quot;http://images.amazon.com/images/P/0195153448.01.MZZZZZZZ.jpg&quot;;&quot;http://images.amazon.com/images/P/0195153448.01.LZZZZZZZ.jpg&quot;</span><br><span class="line">&quot;0002005018&quot;;&quot;Clara Callan&quot;;&quot;Richard Bruce Wright&quot;;&quot;2001&quot;;&quot;HarperFlamingo Canada&quot;;&quot;http://images.amazon.com/images/P/0002005018.01.THUMBZZZ.jpg&quot;;&quot;http://images.amazon.com/images/P/0002005018.01.MZZZZZZZ.jpg&quot;;&quot;http://images.amazon.com/images/P/0002005018.01.LZZZZZZZ.jpg&quot;</span><br><span class="line">&quot;0060973129&quot;;&quot;Decision in Normandy&quot;;&quot;Carlo D&apos;Este&quot;;&quot;1991&quot;;&quot;HarperPerennial&quot;;&quot;http://images.amazon.com/images/P/0060973129.01.THUMBZZZ.jpg&quot;;&quot;http://images.amazon.com/images/P/0060973129.01.MZZZZZZZ.jpg&quot;;&quot;http://images.amazon.com/images/P/0060973129.01.LZZZZZZZ.jpg&quot;</span><br><span class="line">&quot;0374157065&quot;;&quot;Flu: The Story of the Great Influenza Pandemic of 1918 and the Search for the Virus That Caused It&quot;;&quot;Gina Bari Kolata&quot;;&quot;1999&quot;;&quot;Farrar Straus Giroux&quot;;&quot;http://images.amazon.com/images/P/0374157065.01.THUMBZZZ.jpg&quot;;&quot;http://images.amazon.com/images/P/0374157065.01.MZZZZZZZ.jpg&quot;;&quot;http://images.amazon.com/images/P/0374157065.01.LZZZZZZZ.jpg&quot;</span><br><span class="line">&quot;0393045218&quot;;&quot;The Mummies of Urumchi&quot;;&quot;E. J. W. Barber&quot;;&quot;1999&quot;;&quot;W. W. Norton &amp;amp; Company&quot;;&quot;http://images.amazon.com/images/P/0393045218.01.THUMBZZZ.jpg&quot;;&quot;http://images.amazon.com/images/P/0393045218.01.MZZZZZZZ.jpg&quot;;&quot;http://images.amazon.com/images/P/0393045218.01.LZZZZZZZ.jpg&quot;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>数据处理细节：</li>
+</ul>
+<p>由于该数据中ISBN为string格式，spark的ALS默认product id为int格式，因此对该ISBN号进行计算hash处理并取前8位防止整数越界。详细代码如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">dataset_path = os.path.join(&apos;datasets&apos;, &apos;BX-CSV-Dump&apos;)</span><br><span class="line">sc = SparkContext(&quot;local[*]&quot;, &quot;Test&quot;)</span><br><span class="line">ratings_file_path = os.path.join(dataset_path, &apos;BX-Book-Ratings.csv&apos;)</span><br><span class="line">ratings_raw_RDD = sc.textFile(ratings_file_path)</span><br><span class="line">ratings_raw_data_header = ratings_raw_RDD.take(1)[0]</span><br><span class="line">ratings_RDD = ratings_raw_RDD.filter(lambda line: line!=ratings_raw_data_header)\</span><br><span class="line">            .map(lambda line: line.split(&quot;;&quot;)).map(lambda tokens: (int(tokens[0][1:-1]), abs(hash(tokens[1][1:-1])) % (10 ** 8),float(tokens[2][1:-1]))).cache()</span><br><span class="line">books_file_path = os.path.join(dataset_path, &apos;BX-Books.csv&apos;)</span><br><span class="line">books_raw_RDD = sc.textFile(books_file_path)</span><br><span class="line">books_raw_data_header = books_raw_RDD.take(1)[0]</span><br><span class="line">books_RDD = books_raw_RDD.filter(lambda line: line!=books_raw_data_header)\</span><br><span class="line">    .map(lambda line: line.split(&quot;;&quot;))\</span><br><span class="line">    .map(lambda tokens: (abs(hash(tokens[0][1:-1])) % (10 ** 8), tokens[1][1:-1], tokens[2][1:-1], tokens[3][1:-1], tokens[4][1:-1], tokens[5][1:-1])).cache()</span><br><span class="line">books_titles_RDD = books_RDD.map(lambda x: (int(x[0]), x[1], x[2], x[3], x[4], x[5])).cache()</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>选择模型参数：</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line">from pyspark.mllib.recommendation import ALS</span><br><span class="line">import math</span><br><span class="line"></span><br><span class="line">seed = 5L</span><br><span class="line">iterations = 10</span><br><span class="line">regularization_parameter = 0.1</span><br><span class="line">ranks = [4, 8, 12]</span><br><span class="line">errors = [0, 0, 0]</span><br><span class="line">err = 0</span><br><span class="line">tolerance = 0.02</span><br><span class="line"></span><br><span class="line">min_error = float(&apos;inf&apos;)</span><br><span class="line">best_rank = -1</span><br><span class="line">best_iteration = -1</span><br><span class="line">for rank in ranks:</span><br><span class="line">    model = ALS.train(training_RDD, rank, seed=seed, iterations=iterations,</span><br><span class="line">                      lambda_=regularization_parameter)</span><br><span class="line">    predictions = model.predictAll(validation_for_predict_RDD).map(lambda r: ((r[0], r[1]), r[2]))</span><br><span class="line">    rates_and_preds = validation_RDD.map(lambda r: ((int(r[0]), int(r[1])), float(r[2]))).join(predictions)</span><br><span class="line">    error = math.sqrt(rates_and_preds.map(lambda r: (r[1][0] - r[1][1])**2).mean())</span><br><span class="line">    errors[err] = error</span><br><span class="line">    err += 1</span><br><span class="line">    print &apos;For rank %s the RMSE is %s&apos; % (rank, error)</span><br><span class="line">    if error &lt; min_error:</span><br><span class="line">        min_error = error</span><br><span class="line">        best_rank = rank</span><br><span class="line">print &apos;The best model was trained with rank %s&apos; % best_rank</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>模型保存</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">from pyspark.mllib.recommendation import MatrixFactorizationModel</span><br><span class="line">model_path = os.path.join(&apos;..&apos;, &apos;models&apos;, &apos;book_als&apos;)</span><br><span class="line">model.save(sc, model_path)</span><br><span class="line">same_model = MatrixFactorizationModel.load(sc, model_path)</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><p>运行说明：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">virtualenv book</span><br><span class="line">pip install -r requirements.txt</span><br><span class="line">python server.py</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>RESTful API:</p>
+</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">GET: /&lt;int:user_id&gt;/ratings/top/&lt;int:count&gt; 获取用户图书推荐top N信息</span><br><span class="line">GET: /&lt;int:user_id&gt;/ratings/&lt;string:book_id&gt; 获取该用户对某个图书的评价信息</span><br><span class="line">POST: /&lt;int:user_id&gt;/ratings 新增图书评价信息</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>接口调用示例：</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line">GET: /276729/ratings/top/3 获取用户ID为276729的图书推荐top3信息</span><br><span class="line">返回信息：</span><br><span class="line"></span><br><span class="line">[</span><br><span class="line">  &#123;</span><br><span class="line">    &quot;Count&quot;: 30,</span><br><span class="line">    &quot;Rating&quot;: 8.781754720405482,</span><br><span class="line">    &quot;Author&quot;: &quot;MARJANE SATRAPI&quot;,</span><br><span class="line">    &quot;URL&quot;: &quot;http://images.amazon.com/images/P/0375422307.01.THUMBZZZ.jpg&quot;,</span><br><span class="line">    &quot;Publisher&quot;: &quot;Pantheon&quot;,</span><br><span class="line">    &quot;Title&quot;: &quot;Persepolis : The Story of a Childhood (Alex Awards (Awards))&quot;,</span><br><span class="line">    &quot;Year&quot;: &quot;2003&quot;</span><br><span class="line">  &#125;,</span><br><span class="line">  &#123;</span><br><span class="line">    &quot;Count&quot;: 31,</span><br><span class="line">    &quot;Rating&quot;: 7.093566643463471,</span><br><span class="line">    &quot;Author&quot;: &quot;Stephen King&quot;,</span><br><span class="line">    &quot;URL&quot;: &quot;http://images.amazon.com/images/P/067081458X.01.THUMBZZZ.jpg&quot;,</span><br><span class="line">    &quot;Publisher&quot;: &quot;Viking Books&quot;,</span><br><span class="line">    &quot;Title&quot;: &quot;The Eyes of the Dragon&quot;,</span><br><span class="line">    &quot;Year&quot;: &quot;1987&quot;</span><br><span class="line">  &#125;,</span><br><span class="line">  &#123;</span><br><span class="line">    &quot;Count&quot;: 25,</span><br><span class="line">    &quot;Rating&quot;: 7.069147186199548,</span><br><span class="line">    &quot;Author&quot;: &quot;Jean Sasson&quot;,</span><br><span class="line">    &quot;URL&quot;: &quot;http://images.amazon.com/images/P/0967673747.01.THUMBZZZ.jpg&quot;,</span><br><span class="line">    &quot;Publisher&quot;: &quot;Windsor-Brooke Books&quot;,</span><br><span class="line">    &quot;Title&quot;: &quot;Princess: A True Story of Life Behind the Veil in Saudi Arabia&quot;,</span><br><span class="line">    &quot;Year&quot;: &quot;2001&quot;</span><br><span class="line">  &#125;</span><br><span class="line">]</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">GET: /276729/ratings/0446520802 获取用户276729对图书(ISBN:0446520802)的评价信息</span><br><span class="line">返回信息：</span><br><span class="line"></span><br><span class="line">[</span><br><span class="line">  &#123;</span><br><span class="line">    &quot;Count&quot;: 116,</span><br><span class="line">    &quot;Rating&quot;: 1.4087434932956826,</span><br><span class="line">    &quot;Author&quot;: &quot;Nicholas Sparks&quot;,</span><br><span class="line">    &quot;URL&quot;: &quot;http://images.amazon.com/images/P/0446520802.01.THUMBZZZ.jpg&quot;,</span><br><span class="line">    &quot;Publisher&quot;: &quot;Warner Books&quot;,</span><br><span class="line">    &quot;Title&quot;: &quot;The Notebook&quot;,</span><br><span class="line">    &quot;Year&quot;: &quot;1996&quot;</span><br><span class="line">  &#125;</span><br><span class="line">]</span><br></pre></td></tr></table></figure>
+
+<h2 id="其他数据集推荐（参考https-gist-github-com-entaroadun-1653794）"><a href="#其他数据集推荐（参考https-gist-github-com-entaroadun-1653794）" class="headerlink" title="其他数据集推荐（参考https://gist.github.com/entaroadun/1653794）"></a>其他数据集推荐（参考<a href="https://gist.github.com/entaroadun/1653794）" target="_blank" rel="noopener">https://gist.github.com/entaroadun/1653794）</a></h2><p>以下数据可以提供给初学者学习如何训练推荐算法模型</p>
+<p><strong>电影数据</strong>:</p>
+<ul>
+<li><em>MovieLens</em> - Movie Recommendation Data Sets <a href="http://www.grouplens.org/node/73" target="_blank" rel="noopener">http://www.grouplens.org/node/73</a></li>
+<li><em>Yahoo!</em> - Movie, Music, and Images Ratings Data Sets <a href="http://webscope.sandbox.yahoo.com/catalog.php?datatype=r" target="_blank" rel="noopener">http://webscope.sandbox.yahoo.com/catalog.php?datatype=r</a></li>
+<li><em>Cornell University</em> - Movie-review data for use in sentiment-analysis experiments <a href="http://www.cs.cornell.edu/people/pabo/movie-review-data/" target="_blank" rel="noopener">http://www.cs.cornell.edu/people/pabo/movie-review-data/</a></li>
+</ul>
+<p><strong>音乐数据</strong>:</p>
+<ul>
+<li><em>Last.fm</em> - Music Recommendation Data Sets <a href="http://www.dtic.upf.edu/~ocelma/MusicRecommendationDataset/index.html" target="_blank" rel="noopener">http://www.dtic.upf.edu/~ocelma/MusicRecommendationDataset/index.html</a></li>
+<li><em>Yahoo!</em> - Movie, Music, and Images Ratings Data Sets <a href="http://webscope.sandbox.yahoo.com/catalog.php?datatype=r" target="_blank" rel="noopener">http://webscope.sandbox.yahoo.com/catalog.php?datatype=r</a></li>
+<li><em>Audioscrobbler</em> - Music Recommendation Data Sets <a href="http://www-etud.iro.umontreal.ca/~bergstrj/audioscrobbler_data.html" target="_blank" rel="noopener">http://www-etud.iro.umontreal.ca/~bergstrj/audioscrobbler_data.html</a></li>
+<li><em>Amazon</em> - Audio CD recommendations <a href="http://131.193.40.52/data/" target="_blank" rel="noopener">http://131.193.40.52/data/</a></li>
+</ul>
+<p><strong>图书数据</strong>:</p>
+<ul>
+<li><em>Institut für Informatik, Universität Freiburg</em> - Book Ratings Data Sets <a href="http://www.informatik.uni-freiburg.de/~cziegler/BX/" target="_blank" rel="noopener">http://www.informatik.uni-freiburg.de/~cziegler/BX/</a></li>
+</ul>
+<p><strong>美食数据</strong>:</p>
+<ul>
+<li><em>Chicago Entree</em> - Food Ratings Data Sets <a href="http://archive.ics.uci.edu/ml/datasets/Entree+Chicago+Recommendation+Data" target="_blank" rel="noopener">http://archive.ics.uci.edu/ml/datasets/Entree+Chicago+Recommendation+Data</a></li>
+</ul>
+<p><strong>商品数据</strong>:</p>
+<ul>
+<li><em>Amazon</em> - Product Recommendation Data Sets <a href="http://131.193.40.52/data/" target="_blank" rel="noopener">http://131.193.40.52/data/</a></li>
+</ul>
+<p><strong>健康数据</strong>:</p>
+<ul>
+<li><em>Nursing Home</em> - Provider Ratings Data Set <a href="http://data.medicare.gov/dataset/Nursing-Home-Compare-Provider-Ratings/mufm-vy8d" target="_blank" rel="noopener">http://data.medicare.gov/dataset/Nursing-Home-Compare-Provider-Ratings/mufm-vy8d</a></li>
+<li><em>Hospital Ratings</em> - Survey of Patients Hospital Experiences <a href="http://data.medicare.gov/dataset/Survey-of-Patients-Hospital-Experiences-HCAHPS-/rj76-22dk" target="_blank" rel="noopener">http://data.medicare.gov/dataset/Survey-of-Patients-Hospital-Experiences-HCAHPS-/rj76-22dk</a></li>
+</ul>
+<p><strong>相亲数据</strong>:</p>
+<ul>
+<li><em><a href="http://www.libimseti.cz" target="_blank" rel="noopener">www.libimseti.cz</a></em> - Dating website recommendation (collaborative filtering) <a href="http://www.occamslab.com/petricek/data/" target="_blank" rel="noopener">http://www.occamslab.com/petricek/data/</a></li>
+</ul>
+<p><strong>学术文章推荐</strong>:</p>
+<ul>
+<li><em>National University of Singapore</em> - Scholarly Paper Recommendation <a href="http://www.comp.nus.edu.sg/~sugiyama/SchPaperRecData.html" target="_blank" rel="noopener">http://www.comp.nus.edu.sg/~sugiyama/SchPaperRecData.html</a></li>
+</ul>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://xuefenghuang.github.io/2019/09/04/2017-09-25-book_recommender_system/" data-id="ck04v12yi00013syb3mclbppz" class="article-share-link">Share</a>
+      
+      
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2019/09/04/2017-09-25-collaborate-filter/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          协同过滤算法概述
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2019/09/04/2017-05-15-lianjia_scrawler/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">使用python抓取并用kibana分析数据—链家网</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+
+  
+    
+
+  
+    
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archives</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/09/">September 2019</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Recent Posts</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2019/09/04/2019-07-14-redis-study-record/">redis学习笔记</a>
+          </li>
+        
+          <li>
+            <a href="/2019/09/04/2019-09-04-design-patterns-study/">go语言设计模式学习笔记</a>
+          </li>
+        
+          <li>
+            <a href="/2019/09/04/2018-01-25-certbot/">使用certbot为网站免费上https</a>
+          </li>
+        
+          <li>
+            <a href="/2019/09/04/2019-07-14-kafka-study-record/">kafka学习笔记</a>
+          </li>
+        
+          <li>
+            <a href="/2019/09/04/2017-11-13-recommand-algorithm/">广告CTR预测算法综述</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      &copy; 2019 Xuefeng Huang<br>
+      Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+
+
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+<script src="/js/script.js"></script>
+
+
+
+  </div>
+</body>
+</html>
