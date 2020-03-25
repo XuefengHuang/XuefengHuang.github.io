@@ -1,27 +1,133 @@
-<!DOCTYPE html><html lang="zh-CN"><head><meta name="generator" content="Hexo 3.9.0"><meta charset="utf-8"><meta name="X-UA-Compatible" content="IE=edge"><meta name="author" content="Xuefeng"><title>常见的分布式锁 · xuefenghuang.github.io</title><meta name="description" content="redlock算法很易懂，起 5 个 master 节点，分布在不同的机房尽量保证可用性。为了获得锁，client 会进行如下操作：
+<!DOCTYPE html><html lang="zh-CN"><head><meta name="generator" content="Hexo 3.9.0"><meta charset="utf-8"><meta name="X-UA-Compatible" content="IE=edge"><meta name="author" content="Xuefeng"><title>分布式系统学习笔记 · xuefenghuang.github.io</title><meta name="description" content="分布式系统理论（https://www.liangzl.com/get-article-detail-3924.html）一个分布式系统最多只能同时满足一致性（Consistency）、可用性（Availability）和分区容错性（Partition tolerance）这三项中的两项
+满足CP，"><meta name="keywords" content="Golang, Redis, Mysql, Kafka"><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport"><meta content="yes" name="apple-mobile-web-app-capable"><meta content="black" name="apple-mobile-web-app-status-bar-style"><meta content="telephone=no" name="format-detection"><meta name="renderer" content="webkit"><link rel="short icon" href="/images/favicon.png" type="image/x-icon"><link rel="stylesheet" href="/css/style.css"><link rel="stylesheet" href="/css/blog_basic.css"><link rel="stylesheet" href="/css/font-awesome.min.css"><link rel="alternate" type="application/atom+xml" title="ATOM 1.0" href="/atom.xml"></head><body><div class="sidebar animated fadeInDown"><div class="logo-title"><div class="title"><img src="/images/logo@2x.png" style="width:127px;"><h3 title style="text-transform:none;"><a href="/">Xuefeng</a></h3><div class="description"><p>stay hungry stay foolish</p></div></div></div><ul class="social-links"><li><a href="http://github.com/XuefengHuang"><i class="fa fa-github"></i></a></li><li><a href="mailto:huangxuefengcn@gmail.com"><i class="fa fa-envelope"></i></a></li></ul><div class="footer"><a target="_blank" href="/"><span>Theme by </span></a><a href="https://www.caicai.me"> CaiCai </a><span>&</span><a href="https://github.com/Ben02/hexo-theme-Anatole"> Ben</a><div class="by_farbox"><a href="https://hexo.io/zh-cn/" target="_blank">Proudly published with Hexo&#65281;</a></div></div></div><div class="main"><div class="page-top animated fadeInDown"><div class="nav"><li><a href="/">首页</a></li><li><a href="/about">关于</a></li><li><a href="/archives">归档</a></li><li><a href="/links">友链</a></li></div><div class="information"><div class="back_btn"><li><a class="fa fa-chevron-left" onclick="window.history.go(-1)"> </a></li></div><div class="avatar"><img src="/images/favicon.png"></div></div></div><div class="autopagerize_page_element"><div class="content"><div class="post-page"><div class="post animated fadeInDown"><div class="post-title"><h3><a>分布式系统学习笔记</a></h3></div><div class="post-content"><h1 id="分布式系统理论（https-www-liangzl-com-get-article-detail-3924-html）"><a href="#分布式系统理论（https-www-liangzl-com-get-article-detail-3924-html）" class="headerlink" title="分布式系统理论（https://www.liangzl.com/get-article-detail-3924.html）"></a>分布式系统理论（<a href="https://www.liangzl.com/get-article-detail-3924.html）" target="_blank" rel="noopener">https://www.liangzl.com/get-article-detail-3924.html）</a></h1><h3 id="一个分布式系统最多只能同时满足一致性（Consistency）、可用性（Availability）和分区容错性（Partition-tolerance）这三项中的两项"><a href="#一个分布式系统最多只能同时满足一致性（Consistency）、可用性（Availability）和分区容错性（Partition-tolerance）这三项中的两项" class="headerlink" title="一个分布式系统最多只能同时满足一致性（Consistency）、可用性（Availability）和分区容错性（Partition tolerance）这三项中的两项"></a>一个分布式系统最多只能同时满足一致性（Consistency）、可用性（Availability）和分区容错性（Partition tolerance）这三项中的两项</h3><ul>
+<li>满足CP，舍弃A：典型例子是zookeeper，出现问题，只读不写。</li>
+<li>满足AP，舍弃C：对于多数大型互联网应用的场景，主机众多、部署分散，而且现在的集群规模越来越大，所以节点故障、网络故障是常态，而且要保证服务可用性达到N个9，即保证P和A，舍弃C。</li>
+<li>满足CA，舍弃P：跟钱相关的系统会采用。比如银行，出现问题就只能停掉服务了。</li>
+</ul>
+<h3 id="下面具体举例看下CAP对应的实际场景："><a href="#下面具体举例看下CAP对应的实际场景：" class="headerlink" title="下面具体举例看下CAP对应的实际场景："></a>下面具体举例看下CAP对应的实际场景：</h3><ul>
+<li>CA： 假设DB的更新操作是同时写北京和广州的DB都成功才返回成功。在没有出现网络故障的时候，满足CA原则，C即我的任何一个写入，更新操作成功并返回客户端完成后,分布式的所有节点在同一时间的数据完全一致，A即我的读写操作都能够成功，但是当出现网络故障时，我不能同时保证CA，即P条件无法满足。</li>
+<li>AP：假设DB的更新操作是只写本地机房成功就返回，通过binlog/oplog回放方式同步至侧边机房。这种操作保证了在出现网络故障时,双边机房都是可以提供服务的，且读写操作都能成功，意味着他满足了AP ，但是它不满足C，因为更新操作返回成功后，双边机房的DB看到的数据会存在短暂不一致，且在网络故障时，不一致的时间差会很大（仅能保证最终一致性）</li>
+<li>CP：假设DB的更新操作是同时写北京和广州的DB都成功才返回成功且网络故障时提供降级服务。降级服务，如停止写入，只提供读取功能，这样能保证数据是一致的，且网络故障时能提供服务，满足CP原则，但是他无法满足可用性原则</li>
+</ul>
+<h3 id="BASE理论"><a href="#BASE理论" class="headerlink" title="BASE理论"></a>BASE理论</h3><ul>
+<li>BASE理论面向的是大型高可用可扩展的分布式系统，和传统的事物ACID特性是相反的，它完全不同于ACID的强一致性模型，而是通过牺牲强一致性来获得可用性，并允许数据在一段时间内是不一致的，但最终达到一致状态。但同时，在实际的分布式场景中，不同业务单元和组件对数据一致性的要求是不同的，因此在具体的分布式系统架构设计过程中，ACID特性和BASE理论往往又会结合在一起。</li>
+</ul>
+<h1 id="一致性协议"><a href="#一致性协议" class="headerlink" title="一致性协议"></a>一致性协议</h1><ul>
+<li><p>CAP理论告诉我们在分布式环境下网络分区无法避免，需要去权衡选择数据的一致性和可用性，Paxos协议提出了一种极其简单的算法在保障数据一致性时最大限度的优化了可用性，ZooKeeper的ZAB协议把Paxos更加简化，并提供全局时序保证，使得Paxos能够广泛应用到工业场景。</p>
+</li>
+<li><p>Zab VS Raft(<a href="https://i6448038.github.io/2018/12/12/raft/?hmsr=toutiao.io&amp;utm_medium=toutiao.io&amp;utm_source=toutiao.io" target="_blank" rel="noopener">https://i6448038.github.io/2018/12/12/raft/?hmsr=toutiao.io&amp;utm_medium=toutiao.io&amp;utm_source=toutiao.io</a>)</p>
+</li>
+</ul>
+<p>(1) Zab用的是epoch和count的组合来唯一表示一个值, 而Raft用的是term和index.</p>
+<p>(2) Zab的follower在投票给一个leader之前必须和leader的日志达成一致,而raft的follower则简单地说是谁的term高就投票给谁.</p>
+<p>(3) Raft协议的心跳是从leader到follower, 而Zab协议则相反.</p>
+<p>(4) Raft协议数据只有单向地从leader到follower(成为leader的条件之一就是拥有最新的log), 而Zab协议在discovery阶段, 一个prospective leader需要将自己的log更新为quorum里面最新的log,然后才好在synchronization阶段将quorum里的其他机器的log都同步到一致.<br>BTW, raft实现起来比zab会简单很多.</p>
+<h1 id="数据分片"><a href="#数据分片" class="headerlink" title="数据分片"></a>数据分片</h1><p>分布式存储系统中面临着的首要问题就是如何将大量的数据分布在不同的存储节点上</p>
+<table>
+<thead>
+<tr>
+<th>header 1</th>
+<th>映射难度</th>
+<th>元数据</th>
+<th>节点增删</th>
+<th>数据动态均衡</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>hash方式</td>
+<td>简单</td>
+<td>非常简单，几乎不用修改</td>
+<td>需要迁移的数据比较多</td>
+<td>不支持</td>
+</tr>
+<tr>
+<td>无虚拟节点的一致性hash</td>
+<td>简单</td>
+<td>比较简单，取决于节点规模，几乎不用修改</td>
+<td>增删节点的时候只影响hash环上相邻节点，但不能使所有节点都参与数据迁移过程</td>
+<td>不支持</td>
+</tr>
+<tr>
+<td>有虚拟节点的一致性hash</td>
+<td>中等</td>
+<td>稍微复杂一些，主要取决于虚拟节点规模，很少修改</td>
+<td>需要迁移的数据比较少，且所有节点都能贡献部分数据</td>
+<td>若支持（修改虚拟节点与物理节点映射关系）</td>
+</tr>
+<tr>
+<td>基于范围</td>
+<td>较为复杂</td>
+<td>取决于每个块的大小，一般来说规模较大；且修改频率较高</td>
+<td>需要迁移的数据比较少，且所有节点都能贡献部分数据</td>
+<td>支持，且比较容易</td>
+</tr>
+</tbody></table>
+<h1 id="相关应用"><a href="#相关应用" class="headerlink" title="相关应用"></a>相关应用</h1><h3 id="1-分布式锁"><a href="#1-分布式锁" class="headerlink" title="(1)分布式锁"></a>(1)分布式锁</h3><ul>
+<li><p>redlock<br>算法很易懂，起 5 个 master 节点，分布在不同的机房尽量保证可用性。为了获得锁，client 会进行如下操作：<br>(1) 得到当前的时间，微妙单位<br>(2) 尝试顺序地在 5 个实例上申请锁，当然需要使用相同的 key 和 random value，这里一个 client 需要合理设置与 master 节点沟通的 timeout 大小，避免长时间和一个 fail 了的节点浪费时间<br>(3) 当 client 在大于等于 3 个 master 上成功申请到锁的时候，且它会计算申请锁消耗了多少时间，这部分消耗的时间采用获得锁的当下时间减去第一步获得的时间戳得到，如果锁的持续时长（lock validity time）比流逝的时间多的话，那么锁就真正获取到了。<br>(4) 如果锁申请到了，那么锁真正的 lock validity time 应该是 origin（lock validity time） - 申请锁期间流逝的时间<br>(5) 如果 client 申请锁失败了，那么它就会在少部分申请成功锁的 master 节点上执行释放锁的操作，重置状态</p>
+</li>
+<li><p>zookeeper<br>(1) 客户端连接zookeeper，并在/lock下创建临时的且有序的子节点，第一个客户端对应的子节点为/lock/lock-0000000000，第二个为/lock/lock-0000000001，以此类推。<br>(2) 客户端获取/lock下的子节点列表，判断自己创建的子节点是否为当前子节点列表中序号最小的子节点，如果是则认为获得锁，否则监听/lock的子节点变更消息，获得子节点变更通知后重复此步骤直至获得锁；<br>(3) 执行业务代码；<br>(4) 完成业务流程后，删除对应的子节点释放锁。</p>
+</li>
+<li><p>单机redis</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">SET resource_name my_random_value NX PX 30000</span><br></pre></td></tr></table></figure>
 
-得到当前的时间，微妙单位
-尝试顺序地在 5 个实例上申请锁，当然需要使用相同的 key 和 random value，这里一个 client 需要合理设置与 mas"><meta name="keywords" content="Golang, Redis, Mysql, Kafka"><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport"><meta content="yes" name="apple-mobile-web-app-capable"><meta content="black" name="apple-mobile-web-app-status-bar-style"><meta content="telephone=no" name="format-detection"><meta name="renderer" content="webkit"><link rel="short icon" href="/images/favicon.png" type="image/x-icon"><link rel="stylesheet" href="/css/style.css"><link rel="stylesheet" href="/css/blog_basic.css"><link rel="stylesheet" href="/css/font-awesome.min.css"><link rel="alternate" type="application/atom+xml" title="ATOM 1.0" href="/atom.xml"></head><body><div class="sidebar animated fadeInDown"><div class="logo-title"><div class="title"><img src="/images/logo@2x.png" style="width:127px;"><h3 title style="text-transform:none;"><a href="/">Xuefeng</a></h3><div class="description"><p>stay hungry stay foolish</p></div></div></div><ul class="social-links"><li><a href="http://github.com/XuefengHuang"><i class="fa fa-github"></i></a></li><li><a href="mailto:huangxuefengcn@gmail.com"><i class="fa fa-envelope"></i></a></li></ul><div class="footer"><a target="_blank" href="/"><span>Theme by </span></a><a href="https://www.caicai.me"> CaiCai </a><span>&</span><a href="https://github.com/Ben02/hexo-theme-Anatole"> Ben</a><div class="by_farbox"><a href="https://hexo.io/zh-cn/" target="_blank">Proudly published with Hexo&#65281;</a></div></div></div><div class="main"><div class="page-top animated fadeInDown"><div class="nav"><li><a href="/">首页</a></li><li><a href="/about">关于</a></li><li><a href="/archives">归档</a></li><li><a href="/links">友链</a></li></div><div class="information"><div class="back_btn"><li><a class="fa fa-chevron-left" onclick="window.history.go(-1)"> </a></li></div><div class="avatar"><img src="/images/favicon.png"></div></div></div><div class="autopagerize_page_element"><div class="content"><div class="post-page"><div class="post animated fadeInDown"><div class="post-title"><h3><a>常见的分布式锁</a></h3></div><div class="post-content"><h3 id="redlock"><a href="#redlock" class="headerlink" title="redlock"></a>redlock</h3><p>算法很易懂，起 5 个 master 节点，分布在不同的机房尽量保证可用性。为了获得锁，client 会进行如下操作：</p>
-<ul>
-<li>得到当前的时间，微妙单位</li>
-<li>尝试顺序地在 5 个实例上申请锁，当然需要使用相同的 key 和 random value，这里一个 client 需要合理设置与 master 节点沟通的 timeout 大小，避免长时间和一个 fail 了的节点浪费时间</li>
-<li>当 client 在大于等于 3 个 master 上成功申请到锁的时候，且它会计算申请锁消耗了多少时间，这部分消耗的时间采用获得锁的当下时间减去第一步获得的时间戳得到，如果锁的持续时长（lock validity time）比流逝的时间多的话，那么锁就真正获取到了。</li>
-<li>如果锁申请到了，那么锁真正的 lock validity time 应该是 origin（lock validity time） - 申请锁期间流逝的时间</li>
-<li>如果 client 申请锁失败了，那么它就会在少部分申请成功锁的 master 节点上执行释放锁的操作，重置状态</li>
-</ul>
-<h3 id="zookeeper"><a href="#zookeeper" class="headerlink" title="zookeeper"></a>zookeeper</h3><ul>
-<li>客户端连接zookeeper，并在/lock下创建临时的且有序的子节点，第一个客户端对应的子节点为/lock/lock-0000000000，第二个为/lock/lock-0000000001，以此类推。</li>
-<li>客户端获取/lock下的子节点列表，判断自己创建的子节点是否为当前子节点列表中序号最小的子节点，如果是则认为获得锁，否则监听/lock的子节点变更消息，获得子节点变更通知后重复此步骤直至获得锁；</li>
-<li>执行业务代码；</li>
-<li>完成业务流程后，删除对应的子节点释放锁。</li>
-</ul>
-<h3 id="单机redis"><a href="#单机redis" class="headerlink" title="单机redis"></a>单机redis</h3><ul>
-<li><p>SET resource_name my_random_value NX PX 30000</p>
-</li>
-<li><p>主要依靠上述命令，该命令仅当 Key 不存在时（NX保证）set 值，并且设置过期时间 3000ms （PX保证），值 my_random_value 必须是所有 client 和所有锁请求发生期间唯一的，释放锁的逻辑是：</p>
 </li>
 </ul>
+<p>主要依靠上述命令，该命令仅当 Key 不存在时（NX保证）set 值，并且设置过期时间 3000ms （PX保证），值 my_random_value 必须是所有 client 和所有锁请求发生期间唯一的，释放锁的逻辑是：</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">if redis.call(&quot;get&quot;,KEYS[1]) == ARGV[1] then</span><br><span class="line">    return redis.call(&quot;del&quot;,KEYS[1])</span><br><span class="line">else</span><br><span class="line">    return 0</span><br><span class="line">end</span><br></pre></td></tr></table></figure>
 
-<h3 id="谷歌的Chubby"><a href="#谷歌的Chubby" class="headerlink" title="谷歌的Chubby"></a>谷歌的Chubby</h3><p>资料： <a href="https://catkang.github.io/2017/09/29/chubby.html" target="_blank" rel="noopener">https://catkang.github.io/2017/09/29/chubby.html</a></p>
-</div><div class="post-footer"><div class="meta"><div class="info"><i class="fa fa-sun-o"></i><span class="date">2020-03-21</span><i class="fa fa-tag"></i></div></div></div></div><div class="share"><div class="evernote"><a class="fa fa-bookmark" href="javascript:(function(){EN_CLIP_HOST='http://www.evernote.com';try{var%20x=document.createElement('SCRIPT');x.type='text/javascript';x.src=EN_CLIP_HOST+'/public/bookmarkClipper.js?'+(new%20Date().getTime()/100000);document.getElementsByTagName('head')[0].appendChild(x);}catch(e){location.href=EN_CLIP_HOST+'/clip.action?url='+encodeURIComponent(location.href)+'&amp;title='+encodeURIComponent(document.title);}})();" ref="nofollow" target="_blank"></a></div><div class="weibo"><a class="fa fa-weibo" href="javascript:void((function(s,d,e){try{}catch(e){}var f='http://service.weibo.com/share/share.php?',u=d.location.href,p=['url=',e(u),'&amp;title=',e(d.title),'&amp;appkey=2924220432'].join('');function a(){if(!window.open([f,p].join(''),'mb',['toolbar=0,status=0,resizable=1,width=620,height=450,left=',(s.width-620)/2,',top=',(s.height-450)/2].join('')))u.href=[f,p].join('');};if(/Firefox/.test(navigator.userAgent)){setTimeout(a,0)}else{a()}})(screen,document,encodeURIComponent));"></a></div><div class="twitter"><a class="fa fa-twitter" href="http://twitter.com/home?status=,http://xuefenghuang.github.io/2020/03/21/2020-03-21-distributelock/,xuefenghuang.github.io,常见的分布式锁,;"></a></div></div><div class="pagination"><ul class="clearfix"><li class="pre pagbuttons"><a class="btn" role="navigation" href="/2020/03/21/2020-03-21-mysql-study-record/" title="Mysql学习笔记">上一篇</a></li><li class="next pagbuttons"><a class="btn" role="navigation" href="/2019/09/04/2019-07-14-redis-study-record/" title="redis学习笔记">下一篇</a></li></ul></div></div></div></div></div><script src="/js/jquery.js"></script><script src="/js/jquery-migrate-1.2.1.min.js"></script><script src="/js/jquery.appear.js"></script></body></html>
+<ul>
+<li>谷歌的Chubby (<a href="https://catkang.github.io/2017/09/29/chubby.html" target="_blank" rel="noopener">https://catkang.github.io/2017/09/29/chubby.html</a>)</li>
+</ul>
+<h3 id="2-分布式事务"><a href="#2-分布式事务" class="headerlink" title="(2)分布式事务"></a>(2)分布式事务</h3><ul>
+<li>什么是分布式事务</li>
+</ul>
+<p>分布式事务指事务的参与者、支持事务的服务器、资源服务器以及事务管理器分别位于不同的分布式系统的不同节点之上。</p>
+<p>简单的说，就是一次大的操作由不同的小操作组成，这些小的操作分布在不同的服务器上，且属于不同的应用，分布式事务需要保证这些小操作要么全部成功，要么全部失败。</p>
+<p>本质上来说，分布式事务就是为了保证不同数据库的数据一致性。</p>
+<ul>
+<li>分布式事务解决方案</li>
+</ul>
+<p>(1) 2PC</p>
+<p>说到 2PC 就不得不聊数据库分布式事务中的 XA Transactions。</p>
+<p>在 XA 协议中分为两阶段：</p>
+<p>事务管理器要求每个涉及到事务的数据库预提交(precommit)此操作，并反映是否可以提交。<br>事务协调器要求每个数据库提交数据，或者回滚数据。</p>
+<p>优点：<br>尽量保证了数据的强一致，实现成本较低，在各大主流数据库都有自己实现，对于 MySQL 是从 5.5 开始支持。</p>
+<p>缺点：</p>
+<p>单点问题：事务管理器在整个流程中扮演的角色很关键，如果其宕机，比如在***阶段已经完成，在第二阶段正准备提交的时候事务管理器宕机，资源管理器就会一直阻塞，导致数据库无法使用。</p>
+<p>同步阻塞：在准备就绪之后，资源管理器中的资源一直处于阻塞，直到提交完成，释放资源。</p>
+<p>数据不一致：两阶段提交协议虽然为分布式数据强一致性所设计，但仍然存在数据不一致性的可能。<br>比如在第二阶段中，假设协调者发出了事务 Commit 的通知，但是因为网络问题该通知仅被一部分参与者所收到并执行了 Commit 操作，其余的参与者则因为没有收到通知一直处于阻塞状态，这时候就产生了数据的不一致性。</p>
+<p>总的来说，XA 协议比较简单，成本较低，但是其单点问题，以及不能支持高并发(由于同步阻塞)。</p>
+<ul>
+<li>TCC</li>
+</ul>
+<p>关于 TCC（Try-Confirm-Cancel）的概念，最早是由 Pat Helland 于 2007 年发表的一篇名为《Life beyond Distributed Transactions：an Apostate’s Opinion》的论文提出。</p>
+<p>TCC 事务机制相比于上面介绍的 XA，解决了如下几个缺点：</p>
+<p>解决了协调者单点，由主业务方发起并完成这个业务活动。业务活动管理器也变成多点，引入集群。<br>同步阻塞：引入超时，超时后进行补偿，并且不会锁定整个资源，将资源转换为业务逻辑形式，粒度变小。<br>数据一致性，有了补偿机制之后，由业务活动管理器控制一致性。</p>
+<p>对于 TCC 的解释：</p>
+<p>Try 阶段：</p>
+<p>尝试执行，完成所有业务检查（一致性），预留必需业务资源（准隔离性）。</p>
+<p>Confirm 阶段：确认真正执行业务，不作任何业务检查，只使用 Try 阶段预留的业务资源，Confirm 操作满足幂等性。要求具备幂等设计，Confirm 失败后需要进行重试。</p>
+<p>Cancel 阶段：取消执行，释放 Try 阶段预留的业务资源，Cancel 操作满足幂等性。Cancel 阶段的异常和 Confirm 阶段异常处理方案基本上一致。<br>举个简单的例子：如果你用 100 元买了一瓶水， Try 阶段：你需要向你的钱包检查是否够 100 元并锁住这 100 元，水也是一样的。</p>
+<p>如果有一个失败，则进行 Cancel(释放这 100 元和这一瓶水)，如果 Cancel 失败不论什么失败都进行重试 Cancel，所以需要保持幂等。</p>
+<p>如果都成功，则进行 Confirm，确认这 100 元被扣，和这一瓶水被卖，如果 Confirm 失败无论什么失败则重试(会依靠活动日志进行重试)。</p>
+<p>对于 TCC 来说适合一些：强隔离性，严格一致性要求的活动业务。执行时间较短的业务。</p>
+<ul>
+<li>本地消息表</li>
+</ul>
+<p>本地消息表这个方案最初是 eBay 提出的。</p>
+<p>此方案的核心是将需要分布式处理的任务通过消息日志的方式来异步执行。消息日志可以存储到本地文本、数据库或消息队列，再通过业务规则自动或人工发起重试。</p>
+<p>人工重试更多的是应用于支付场景，通过对账系统对事后问题的处理。</p>
+<p>对于本地消息队列来说核心是把大事务转变为小事务。还是举上面用 100 元去买一瓶水的例子。</p>
+<ol>
+<li><p>当你扣钱的时候，你需要在你扣钱的服务器上新增加一个本地消息表，你需要把你扣钱和减去水的库存写入到本地消息表，放入同一个事务(依靠数据库本地事务保证一致性）。</p>
+</li>
+<li><p>这个时候有个定时任务去轮询这个本地事务表，把没有发送的消息，扔给商品库存服务器，叫它减去水的库存，到达商品服务器之后，这时得先写入这个服务器的事务表，然后进行扣减，扣减成功后，更新事务表中的状态。</p>
+</li>
+<li><p>商品服务器通过定时任务扫描消息表或者直接通知扣钱服务器，扣钱服务器在本地消息表进行状态更新。</p>
+</li>
+<li><p>针对一些异常情况，定时扫描未成功处理的消息，进行重新发送，在商品服务器接到消息之后，首先判断是否是重复的。</p>
+</li>
+</ol>
+<p>如果已经接收，再判断是否执行，如果执行在马上又进行通知事务；如果未执行，需要重新执行由业务保证幂等，也就是不会多扣一瓶水。</p>
+<p>本地消息队列是 BASE 理论，是最终一致模型，适用于对一致性要求不高的情况。实现这个模型时需要注意重试的幂等。</p>
+</div><div class="post-footer"><div class="meta"><div class="info"><i class="fa fa-sun-o"></i><span class="date">2020-03-21</span><i class="fa fa-tag"></i></div></div></div></div><div class="share"><div class="evernote"><a class="fa fa-bookmark" href="javascript:(function(){EN_CLIP_HOST='http://www.evernote.com';try{var%20x=document.createElement('SCRIPT');x.type='text/javascript';x.src=EN_CLIP_HOST+'/public/bookmarkClipper.js?'+(new%20Date().getTime()/100000);document.getElementsByTagName('head')[0].appendChild(x);}catch(e){location.href=EN_CLIP_HOST+'/clip.action?url='+encodeURIComponent(location.href)+'&amp;title='+encodeURIComponent(document.title);}})();" ref="nofollow" target="_blank"></a></div><div class="weibo"><a class="fa fa-weibo" href="javascript:void((function(s,d,e){try{}catch(e){}var f='http://service.weibo.com/share/share.php?',u=d.location.href,p=['url=',e(u),'&amp;title=',e(d.title),'&amp;appkey=2924220432'].join('');function a(){if(!window.open([f,p].join(''),'mb',['toolbar=0,status=0,resizable=1,width=620,height=450,left=',(s.width-620)/2,',top=',(s.height-450)/2].join('')))u.href=[f,p].join('');};if(/Firefox/.test(navigator.userAgent)){setTimeout(a,0)}else{a()}})(screen,document,encodeURIComponent));"></a></div><div class="twitter"><a class="fa fa-twitter" href="http://twitter.com/home?status=,http://xuefenghuang.github.io/2020/03/21/2020-03-21-distributelock/,xuefenghuang.github.io,分布式系统学习笔记,;"></a></div></div><div class="pagination"><ul class="clearfix"><li class="pre pagbuttons"><a class="btn" role="navigation" href="/2020/03/21/2020-03-21-mysql-study-record/" title="Mysql学习笔记">上一篇</a></li><li class="next pagbuttons"><a class="btn" role="navigation" href="/2019/09/04/2019-07-14-redis-study-record/" title="redis学习笔记">下一篇</a></li></ul></div></div></div></div></div><script src="/js/jquery.js"></script><script src="/js/jquery-migrate-1.2.1.min.js"></script><script src="/js/jquery.appear.js"></script></body></html>
